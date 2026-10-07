@@ -43,7 +43,7 @@ The project follows one guiding rule: **JSON says what; Python says how; assets 
 - `game/systems/`: optional reusable interactions such as gaze interpretation and hand tracing.
 - `game/rendering/`: presentation only. Renderers draw shared worlds/characters/UI but do not decide narrative progression. `TextRenderer` owns dialogue/thought/help presentation while `DialogueManager` owns dialogue state and timing.
 - `data/scenes/`: scene-specific timings, thresholds, transitions, controls/help, and interaction parameters.
-- `data/dialogue/{it,en}/`: localized dialogue plus per-line typewriter speed and delay.
+- `data/dialogue/{it,en}/`: localized dialogue plus per-line typewriter speed.
 - `data/worlds/`: authored geometry shared by multiple scenes; Scenes 04 and 05 use the same river/estuary definition.
 - `assets/`: final artwork, animation, fonts, and audio.
 
@@ -62,3 +62,7 @@ python -m unittest discover -s tests -v
 ```
 
 They verify localization parity, scene/config references, shared world data, locale normalization, and important irreversible interaction invariants.
+
+## Dialogue controls
+
+Dialogue advances manually. Press **Enter** or **Backspace** while a line is typing to reveal it immediately; press either key again once the line is complete to advance to the next line.

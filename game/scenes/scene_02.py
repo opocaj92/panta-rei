@@ -50,6 +50,9 @@ class Scene02(Scene):
         self.dialogue_started = False
         self.transition_started = False
 
+    def help_needed(self):
+        return not self.progress_complete
+
     def enter(self):
         self.game.dialogue.load("scene_02")
 
@@ -64,12 +67,15 @@ class Scene02(Scene):
     def update(self, dt):
         if not self.progress_complete:
             if self.current_view == self.stella_view:
-                self.stella_attention += dt
-                if self.stella_attention >= self.stella_required:
-                    self.stella_seen = True
+                if not self.stella_seen:
+                    self.stella_attention += dt
+                    self.mark_help_progress()
+                    if self.stella_attention >= self.stella_required:
+                        self.stella_seen = True
 
             elif self.current_view == self.river_view and self.stella_seen:
                 self.river_attention += dt
+                self.mark_help_progress()
                 if self.river_attention >= self.river_required:
                     self.progress_complete = True
                     self.dialogue_delay = float(

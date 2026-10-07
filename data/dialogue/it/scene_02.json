@@ -4,15 +4,13 @@
       "speaker": "Marco",
       "type": "speech",
       "text": "Panta rei Stella, tutto scorre, ce l'hanno insegnato a scuola.",
-      "speed": 40,
-      "delay": 1.0
+      "speed": 40
     },
     {
       "speaker": "Marco",
       "type": "speech",
       "text": "Una di quelle verità statutarie che finisci per accettare senza fare una grinza, magari senza neanche chiederti bene cosa voglia dire.",
-      "speed": 30,
-      "delay": 1.5
+      "speed": 30
     }
   ]
 }

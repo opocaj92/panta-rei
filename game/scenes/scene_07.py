@@ -21,6 +21,9 @@ class Scene07(Scene):
         self.transition_started = False
         self.elapsed = 0.0
 
+    def help_needed(self):
+        return not self.pan_started
+
     def enter(self):
         camera = self.config.get("camera", {})
         self.start_y = float(camera.get("phone_y", 600.0))
@@ -35,6 +38,7 @@ class Scene07(Scene):
 
         if event.key in (pygame.K_UP, pygame.K_w):
             self.pan_started = True
+            self.mark_help_progress()
             self.pan_elapsed = 0.0
 
     def update(self, dt):

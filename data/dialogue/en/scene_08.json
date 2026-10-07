@@ -4,29 +4,25 @@
       "speaker": "Stella",
       "type": "speech",
       "text": "Like, if instead of talking all this bullshit you kissed me right now",
-      "speed": 35,
-      "delay": 0.35
+      "speed": 35
     },
     {
       "speaker": "",
       "type": "thought",
       "text": "how romantic would that be!",
-      "speed": 30,
-      "delay": 0.8
+      "speed": 30
     },
     {
       "speaker": "Stella",
       "type": "speech",
       "text": "don't you think my breath and yours would become one?",
-      "speed": 35,
-      "delay": 0.7
+      "speed": 35
     },
     {
       "speaker": "Stella",
       "type": "speech",
       "text": "Don't you think your soul would flow toward mine and mine toward yours until they met?",
-      "speed": 35,
-      "delay": 0.9
+      "speed": 35
     }
   ]
 }

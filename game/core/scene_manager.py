@@ -1,4 +1,3 @@
-import pygame
 import json
 
 from game.core.config import DATA_DIR
@@ -134,12 +133,8 @@ class SceneManager:
         self._activate_scene(scene_name, start_transition_in=False, state=state)
 
     def handle_input(self, event):
-        if not self.current:
-            return
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_h:
-            self.current.show_help()
-            return
-        self.current.handle_input(event)
+        if self.current:
+            self.current.handle_input(event)
 
     def update(self, dt):
         if self.current:

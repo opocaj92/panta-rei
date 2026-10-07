@@ -39,6 +39,15 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.running = False
                 self.input.handle_event(event)
+
+                # Dialogue progression is a global interaction: the same keys
+                # reveal/advance text regardless of which scene presents it.
+                if (
+                    event.type == pygame.KEYDOWN
+                    and event.key in (pygame.K_RETURN, pygame.K_BACKSPACE)
+                ):
+                    self.dialogue.advance()
+
                 self.scenes.handle_input(event)
 
             self.scenes.update(dt)

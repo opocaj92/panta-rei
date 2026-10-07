@@ -17,6 +17,9 @@ class Scene11(Scene):
         self.speaking_time = 0.0
         self.transition_started = False
 
+    def help_needed(self):
+        return self.phase == "waiting_for_look"
+
     def enter(self):
         self.phase = "dialogue"
         self.gaze_progress = 0.0
@@ -33,6 +36,7 @@ class Scene11(Scene):
             return
         if event.key in (pygame.K_UP, pygame.K_w):
             self.phase = "looking_up"
+            self.mark_help_progress()
             self.phase_timer = 0.0
 
     def update(self, dt):

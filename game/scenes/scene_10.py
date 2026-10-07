@@ -17,6 +17,9 @@ class Scene10(Scene):
         self.post_complete_elapsed = 0.0
         self.mouth = pygame.Vector2(0, 0)
 
+    def help_needed(self):
+        return not self.connected and not self.transition_started
+
     @property
     def interaction_cfg(self):
         return self.config.get("interaction", {})
@@ -48,9 +51,12 @@ class Scene10(Scene):
             sensitivity = float(self.interaction_cfg.get("drag_sensitivity", 1.0))
 
             rel = pygame.Vector2(event.rel) * sensitivity
+            previous_x = self.mouth.x
             self.mouth += rel
             self.mouth.x = max(min_x, min(max_x, self.mouth.x))
             self.mouth.y = max(min_y, min(max_y, self.mouth.y))
+            if self.mouth.x < previous_x:
+                self.mark_help_progress()
 
             sea_edge = w * float(self.interaction_cfg.get("sea_edge_fraction", 0.30))
             snap_distance = float(self.interaction_cfg.get("snap_distance", 34.0))

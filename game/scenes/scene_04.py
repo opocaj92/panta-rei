@@ -32,6 +32,8 @@ class Scene04(Scene):
         )
 
         self.estuary_visible = False
+        self.best_estuary_distance = float("inf")
+        self.best_visible_fraction = 0.0
         self.transition_started = False
         self.flow_time = 0.0
 
@@ -41,6 +43,9 @@ class Scene04(Scene):
             self.world_height,
             self.river_points,
         )
+
+    def help_needed(self):
+        return not self.estuary_visible and not self.transition_started
 
     def enter(self):
         self.game.dialogue.load("scene_04")
@@ -103,6 +108,17 @@ class Scene04(Scene):
         region_area = self.estuary_region.width * self.estuary_region.height
         visible_area = visible.width * visible.height
         visible_fraction = visible_area / region_area if region_area else 0.0
+
+        viewport_center = pygame.Vector2(viewport.center)
+        estuary_center = pygame.Vector2(self.estuary_region.center)
+        distance = viewport_center.distance_to(estuary_center)
+        if (
+            distance < self.best_estuary_distance - 1.0
+            or visible_fraction > self.best_visible_fraction + 0.001
+        ):
+            self.best_estuary_distance = min(self.best_estuary_distance, distance)
+            self.best_visible_fraction = max(self.best_visible_fraction, visible_fraction)
+            self.mark_help_progress()
 
         self.estuary_visible = visible_fraction >= self.required_visible_fraction
 

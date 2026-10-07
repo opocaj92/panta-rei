@@ -4,8 +4,7 @@
       "speaker": "Marco",
       "type": "speech",
       "text": "Hey Stella, are you listening to me?",
-      "speed": 35,
-      "delay": 0.8
+      "speed": 35
     }
   ]
 }

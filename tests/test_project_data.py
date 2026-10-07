@@ -26,8 +26,8 @@ class ProjectDataTests(unittest.TestCase):
             self.assertEqual(len(a),len(b),name)
             self.assertEqual([x.get("type","dialogue") for x in a],[x.get("type","dialogue") for x in b],name)
             for line in a+b:
-                self.assertGreater(float(line.get("speed",40)),0)
-                self.assertGreaterEqual(float(line.get("delay",0.8)),0)
+                self.assertGreater(float(line.get("speed", 40)), 0)
+                self.assertNotIn("delay", line)
 
     def test_interactive_help_is_bilingual(self):
         for n in (2,4,5,7,8,9,10,11):

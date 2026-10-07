@@ -25,6 +25,9 @@ class Scene09(Scene):
         self.interaction_finished = False
         self.transition_started = False
 
+    def help_needed(self):
+        return self.phase in (self.APPROACHING, self.SEPARATING)
+
     @property
     def interaction_cfg(self):
         return self.config.get("interaction", {})
@@ -54,10 +57,13 @@ class Scene09(Scene):
             # Dragging either figure changes only its distance from the centre;
             # the counterpart is rendered at the mirrored distance automatically.
             radial_delta = (-dx if self.drag_side == "left" else dx) * sensitivity
+            previous_separation = self.separation
             self.separation += radial_delta
 
             if self.phase == self.APPROACHING:
                 self.separation = max(0.0, min(self.separation, float(self.interaction_cfg.get("start_separation", 260.0))))
+                if self.separation < previous_separation:
+                    self.mark_help_progress()
                 if self.separation <= float(self.interaction_cfg.get("join_threshold", 4.0)):
                     self.separation = 0.0
                     self.phase = self.JOINED
@@ -66,6 +72,8 @@ class Scene09(Scene):
             elif self.phase == self.SEPARATING:
                 target = float(self.interaction_cfg.get("final_separation", 260.0))
                 self.separation = max(0.0, min(self.separation, target))
+                if self.separation > previous_separation:
+                    self.mark_help_progress()
                 if self.separation >= target:
                     self.separation = target
                     self.phase = self.COMPLETE

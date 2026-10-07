@@ -4,7 +4,11 @@ from .config import DATA_DIR
 
 
 class DialogueManager:
-    """Own dialogue data, progression, delays, and typewriter state."""
+    """Own dialogue data, player-controlled progression, and typewriter state.
+
+    Dialogue never advances on a timer. The first advance request while a line is
+    typing reveals it immediately; a subsequent request advances to the next line.
+    """
 
     def __init__(self, language="en"):
         self.language = language
@@ -12,7 +16,6 @@ class DialogueManager:
         self.index = 0
         self.visible_characters = 0.0
         self.finished = True
-        self.completed_line_timer = 0.0
 
     def load(self, scene_name):
         localized = DATA_DIR / "dialogue" / self.language / f"{scene_name}.json"
@@ -26,7 +29,6 @@ class DialogueManager:
 
         self.index = 0
         self.visible_characters = 0.0
-        self.completed_line_timer = 0.0
         self.finished = not bool(self.lines)
 
     @property
@@ -53,12 +55,10 @@ class DialogueManager:
             return
         if not self.current_text_complete:
             speed = float(line.get("speed", 40.0))
-            self.visible_characters = min(len(line["text"]), self.visible_characters + speed * dt)
-            self.completed_line_timer = 0.0
-            return
-        self.completed_line_timer += dt
-        if self.completed_line_timer >= float(line.get("delay", 0.8)):
-            self.advance()
+            self.visible_characters = min(
+                len(line["text"]),
+                self.visible_characters + speed * dt,
+            )
 
     def advance(self):
         if self.finished:
@@ -68,6 +68,5 @@ class DialogueManager:
             return
         self.index += 1
         self.visible_characters = 0.0
-        self.completed_line_timer = 0.0
         if self.index >= len(self.lines):
             self.finished = True

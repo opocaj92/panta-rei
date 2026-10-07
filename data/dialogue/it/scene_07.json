@@ -4,36 +4,31 @@
       "speaker": "Stella",
       "type": "speech",
       "text": "E che palle Marco, uno esce la sera per stare tranquilla e invece si deve sorbire una lezione di Fellucci fuori orario...",
-      "speed": 34,
-      "delay": 0.9
+      "speed": 34
     },
     {
       "speaker": "Stella",
       "type": "speech",
       "text": "Che poi scusa eh, ma che vuol dire quello che hai detto?",
-      "speed": 36,
-      "delay": 0.8
+      "speed": 36
     },
     {
       "speaker": "Stella",
       "type": "speech",
       "text": "Il fiume resta fiume, poi tocca il mare e diventa mare.",
-      "speed": 36,
-      "delay": 0.65
+      "speed": 36
     },
     {
       "speaker": "Stella",
       "type": "speech",
       "text": "Semplice, lineare, pulito.",
-      "speed": 32,
-      "delay": 0.75
+      "speed": 32
     },
     {
       "speaker": "Stella",
       "type": "speech",
       "text": "Che c'è da chiedersi scusa?",
-      "speed": 34,
-      "delay": 0.9
+      "speed": 34
     }
   ]
 }

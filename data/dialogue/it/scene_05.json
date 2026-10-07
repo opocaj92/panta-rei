@@ -4,29 +4,25 @@
       "speaker": "Marco",
       "type": "speech",
       "text": "Oppure veramente si fondono in un tutt'uno, ed il fiume smette di essere fiume per diventare mare?",
-      "speed": 38,
-      "delay": 1.0
+      "speed": 38
     },
     {
       "speaker": "Marco",
       "type": "speech",
       "text": "Però allora in che punto smette di essere fiume?",
-      "speed": 36,
-      "delay": 0.9
+      "speed": 36
     },
     {
       "speaker": "Marco",
       "type": "speech",
       "text": "Cioè, dov'è la linea precisa dove il fiume non è più fiume e diventa mare, smettendo di scorrere?",
-      "speed": 36,
-      "delay": 1.1
+      "speed": 36
     },
     {
       "speaker": "Marco",
       "type": "speech",
       "text": "Perché non è che si vede eh, non c'è tipo una linea o una freccia o qualcosa, semplicemente succede, ma dove e quando?",
-      "speed": 36,
-      "delay": 1.2
+      "speed": 36
     }
   ]
 }
