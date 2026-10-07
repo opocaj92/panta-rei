@@ -1,0 +1,26 @@
+{
+  "id": "scene_04",
+  "type": "river_navigation",
+  "transition_in": {
+    "type": "fade_from_black",
+    "duration": 1.5
+  },
+  "transition_out": {
+    "type": "none",
+    "duration": 0.0
+  },
+  "world": "river_estuary",
+  "camera_start": [
+    0,
+    1500
+  ],
+  "camera_speed": 360.0,
+  "estuary": {
+    "required_visible_fraction": 0.6
+  },
+  "next_scene": "scene_05",
+  "help": {
+    "it": "Usa WASD o le frecce per seguire il fiume.",
+    "en": "Use WASD or the arrow keys to follow the river."
+  }
+}

@@ -1,0 +1,111 @@
+{
+  "id": "scene_12",
+  "type": "phone_credits",
+  "camera_y": 600.0,
+  "credits_start_y": 300.0,
+  "scroll_speed": 28.0,
+  "final_credit_y": 112.0,
+  "final_hold_duration": 2.0,
+  "transition_in": {
+    "type": "fade_from_black",
+    "duration": 1.0
+  },
+  "transition_out": {
+    "type": "fade_to_black",
+    "duration": 1.5
+  },
+  "credits_by_language": {
+    "it": [
+      {
+        "kind": "title",
+        "text": "PANTA REI"
+      },
+      {
+        "kind": "role",
+        "text": "Creato da"
+      },
+      {
+        "kind": "name",
+        "text": "Jacopo Castellini"
+      },
+      {
+        "kind": "role",
+        "text": "Scritto da"
+      },
+      {
+        "kind": "name",
+        "text": "Jacopo Castellini"
+      },
+      {
+        "kind": "role",
+        "text": "Game Design"
+      },
+      {
+        "kind": "name",
+        "text": "Jacopo Castellini"
+      },
+      {
+        "kind": "role",
+        "text": "Programmazione"
+      },
+      {
+        "kind": "name",
+        "text": "Jacopo Castellini"
+      },
+      {
+        "kind": "assistance",
+        "text": "Assistenza allo sviluppo:"
+      },
+      {
+        "kind": "assistance",
+        "text": "ChatGPT"
+      }
+    ],
+    "en": [
+      {
+        "kind": "title",
+        "text": "PANTA REI"
+      },
+      {
+        "kind": "role",
+        "text": "Created by"
+      },
+      {
+        "kind": "name",
+        "text": "Jacopo Castellini"
+      },
+      {
+        "kind": "role",
+        "text": "Written by"
+      },
+      {
+        "kind": "name",
+        "text": "Jacopo Castellini"
+      },
+      {
+        "kind": "role",
+        "text": "Game Design"
+      },
+      {
+        "kind": "name",
+        "text": "Jacopo Castellini"
+      },
+      {
+        "kind": "role",
+        "text": "Programming"
+      },
+      {
+        "kind": "name",
+        "text": "Jacopo Castellini"
+      },
+      {
+        "kind": "assistance",
+        "text": "Development assistance:"
+      },
+      {
+        "kind": "assistance",
+        "text": "ChatGPT"
+      }
+    ]
+  }
+}

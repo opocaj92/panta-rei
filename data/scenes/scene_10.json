@@ -1,0 +1,30 @@
+{
+  "id": "scene_10",
+  "type": "river_to_sea",
+  "interaction": {
+    "start_x": 640.0,
+    "start_y": 342.0,
+    "min_x": 294.0,
+    "max_x": 700.0,
+    "min_y": 185.0,
+    "max_y": 455.0,
+    "grab_radius": 85.0,
+    "drag_sensitivity": 1.0,
+    "sea_edge_fraction": 0.3,
+    "snap_distance": 36.0
+  },
+  "post_complete_delay": 0.55,
+  "next_scene": "scene_11",
+  "transition_in": {
+    "type": "none",
+    "duration": 0.0
+  },
+  "transition_out": {
+    "type": "eye_blink",
+    "duration": 1.2
+  },
+  "help": {
+    "it": "Trascina il fiume verso il mare.",
+    "en": "Drag the river toward the sea."
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "id": "scene_05",
+  "type": "estuary_tracing",
+  "transition_in": {
+    "type": "none",
+    "duration": 0.0
+  },
+  "transition_out": {
+    "type": "eye_blink",
+    "duration": 1.2
+  },
+  "world": "river_estuary",
+  "camera": [
+    1400,
+    0
+  ],
+  "tracing": {
+    "trace_lifetime": 2.8,
+    "trace_width": 3,
+    "min_point_distance": 5.0
+  },
+  "post_dialogue_delay": 1.5,
+  "next_scene": "scene_06",
+  "help": {
+    "it": "Tieni premuto il tasto sinistro del mouse e trascina per tracciare.",
+    "en": "Hold the left mouse button and drag to trace."
+  }
+}

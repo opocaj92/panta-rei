@@ -1,0 +1,32 @@
+{
+  "lines": [
+    {
+      "speaker": "Marco",
+      "type": "speech",
+      "text": "Or maybe they really do merge into one, and the river stops being a river and becomes the sea?",
+      "speed": 38,
+      "delay": 1.0
+    },
+    {
+      "speaker": "Marco",
+      "type": "speech",
+      "text": "But then, at what point does it stop being a river?",
+      "speed": 36,
+      "delay": 0.9
+    },
+    {
+      "speaker": "Marco",
+      "type": "speech",
+      "text": "Like, where exactly is the line where the river isn't a river anymore and becomes the sea, and stops flowing?",
+      "speed": 36,
+      "delay": 1.1
+    },
+    {
+      "speaker": "Marco",
+      "type": "speech",
+      "text": "Because it's not like you can see it. There's no line or arrow or anything. It just happens, but where and when?",
+      "speed": 36,
+      "delay": 1.2
+    }
+  ]
+}

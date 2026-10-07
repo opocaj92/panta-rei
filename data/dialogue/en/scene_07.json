@@ -1,0 +1,39 @@
+{
+  "lines": [
+    {
+      "speaker": "Stella",
+      "type": "speech",
+      "text": "For fuck's sake, Marco. You go out at night to relax and instead you have to sit through a Fellucci lecture outside school hours...",
+      "speed": 34,
+      "delay": 0.9
+    },
+    {
+      "speaker": "Stella",
+      "type": "speech",
+      "text": "And anyway, sorry, but what was any of that supposed to mean?",
+      "speed": 36,
+      "delay": 0.8
+    },
+    {
+      "speaker": "Stella",
+      "type": "speech",
+      "text": "The river stays a river, then it touches the sea and becomes the sea.",
+      "speed": 36,
+      "delay": 0.65
+    },
+    {
+      "speaker": "Stella",
+      "type": "speech",
+      "text": "Simple, straightforward, clean.",
+      "speed": 32,
+      "delay": 0.75
+    },
+    {
+      "speaker": "Stella",
+      "type": "speech",
+      "text": "What's there to wonder about, exactly?",
+      "speed": 34,
+      "delay": 0.9
+    }
+  ]
+}

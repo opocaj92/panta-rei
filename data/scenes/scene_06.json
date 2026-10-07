@@ -1,0 +1,16 @@
+{
+  "id": "scene_06",
+  "type": "black_screen_dialogue",
+  "post_dialogue_delay": 1.0,
+  "text_position": "center",
+  "text_max_width": 760,
+  "next_scene": "scene_07",
+  "transition_in": {
+    "type": "none",
+    "duration": 0.0
+  },
+  "transition_out": {
+    "type": "none",
+    "duration": 0.0
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "id": "scene_09",
+  "type": "mirrored_silhouettes",
+  "interaction": {
+    "start_separation": 260.0,
+    "final_separation": 260.0,
+    "join_threshold": 4.0,
+    "grab_radius": 105.0,
+    "drag_sensitivity": 1.0,
+    "joined_lock_duration": 2.0
+  },
+  "next_scene": "scene_10",
+  "transition_in": {
+    "type": "none",
+    "duration": 0.0
+  },
+  "transition_out": {
+    "type": "eye_blink",
+    "duration": 1.2
+  },
+  "help": {
+    "it": "Trascina una sagoma lungo la linea; l’altra si muoverà simmetricamente.",
+    "en": "Drag either silhouette along the line; the other moves symmetrically."
+  }
+}

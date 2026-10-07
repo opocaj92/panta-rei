@@ -1,0 +1,22 @@
+{
+  "id": "scene_07",
+  "type": "stella_phone_pov",
+  "camera": {
+    "phone_y": 600,
+    "marco_y": 0,
+    "pan_duration": 1.25
+  },
+  "next_scene": "scene_08",
+  "transition_in": {
+    "type": "fade_from_black",
+    "duration": 1.0
+  },
+  "transition_out": {
+    "type": "none",
+    "duration": 0.0
+  },
+  "help": {
+    "it": "Premi W o freccia su per alzare lo sguardo.",
+    "en": "Press W or the up arrow to look up."
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "lines": [
+    {
+      "speaker": "Marco",
+      "type": "speech",
+      "text": "Il fiume davanti a noi scorre, giusto?",
+      "speed": 40,
+      "delay": 0.9
+    },
+    {
+      "speaker": "Marco",
+      "type": "speech",
+      "text": "Ma verso dove scorre questo fiume?",
+      "speed": 40,
+      "delay": 0.8
+    },
+    {
+      "speaker": "Marco",
+      "type": "speech",
+      "text": "Verso il mare?",
+      "speed": 38,
+      "delay": 0.7
+    },
+    {
+      "speaker": "Marco",
+      "type": "speech",
+      "text": "Si, lo so, pure questo ce l'hanno insegnato a scuola, la Martinetti in secondo.",
+      "speed": 40,
+      "delay": 1.0
+    },
+    {
+      "speaker": "Marco",
+      "type": "speech",
+      "text": "Ma non ci hanno insegnato mai cosa succede al fiume una volta che raggiunge il mare.",
+      "speed": 38,
+      "delay": 1.1
+    },
+    {
+      "speaker": "Marco",
+      "type": "speech",
+      "text": "Cioè, tipo sparisce e diventano un tutt'uno?",
+      "speed": 38,
+      "delay": 0.9
+    },
+    {
+      "speaker": "Marco",
+      "type": "speech",
+      "text": "O magari rimane lì dov'è, ci entra ma senza veramente unircisi?",
+      "speed": 38,
+      "delay": 1.0
+    },
+    {
+      "speaker": "Marco",
+      "type": "speech",
+      "text": "Perché, se non ci si unisce, allora dovrebbe ancora scorrere giusto?",
+      "speed": 38,
+      "delay": 1.0
+    },
+    {
+      "speaker": "Marco",
+      "type": "speech",
+      "text": "E verso dove scorrerebbe allora?",
+      "speed": 38,
+      "delay": 0.8
+    },
+    {
+      "speaker": "Marco",
+      "type": "speech",
+      "text": "Un'altro mare?",
+      "speed": 34,
+      "delay": 0.8
+    },
+    {
+      "speaker": "Marco",
+      "type": "speech",
+      "text": "Che poi tanto i mari sono tutti lo stesso mare, siamo solo noi a metterci i nomi sopra nelle cartine.",
+      "speed": 38,
+      "delay": 1.2
+    }
+  ]
+}

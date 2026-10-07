@@ -1,0 +1,26 @@
+{
+  "id": "scene_01",
+  "type": "establishing_shot",
+
+  "title": {
+    "text": "Panta Rei",
+    "delay": 2.0,
+    "fade_in": 0.5,
+    "hold": 2.5,
+    "fade_out": 0.8
+  },
+
+  "transition_in": {
+    "type": "none",
+    "duration": 0.0
+  },
+
+  "transition_out": {
+    "type": "fade_to_black",
+    "duration": 1.5
+  },
+
+  "auto_delay": 7.0,
+
+  "background": "lake_establishing"
+}

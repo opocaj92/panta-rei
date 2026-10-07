@@ -1,0 +1,35 @@
+{
+  "id": "scene_02",
+  "type": "gaze_puzzle",
+  "initial_view": "river",
+  "transition_in": {
+    "type": "fade_from_black",
+    "duration": 1.5
+  },
+  "transition_out": {
+    "type": "fade_to_black",
+    "duration": 1.5
+  },
+  "dialogue_start_delay": 0.8,
+  "views": [
+    "grass",
+    "river",
+    "stella",
+    "city"
+  ],
+  "sky_view": "sky",
+  "attention_sequence": [
+    {
+      "view": "stella",
+      "duration": 1.0
+    },
+    {
+      "view": "river",
+      "duration": 2.5
+    }
+  ],
+  "help": {
+    "it": "Usa WASD o le frecce per spostare lo sguardo.",
+    "en": "Use WASD or the arrow keys to move your gaze."
+  }
+}

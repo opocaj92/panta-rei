@@ -1,0 +1,20 @@
+{
+  "id": "scene_11",
+  "type": "stella_to_sky",
+  "gaze_move_duration": 1.15,
+  "sky_hold_duration": 4.5,
+  "black_hold_duration": 1.0,
+  "next_scene": "scene_12",
+  "transition_in": {
+    "type": "none",
+    "duration": 0.0
+  },
+  "transition_out": {
+    "type": "fade_to_black",
+    "duration": 1.15
+  },
+  "help": {
+    "it": "Dopo che Stella ha finito di parlare, premi W o freccia su per guardare il cielo.",
+    "en": "After Stella finishes speaking, press W or the up arrow to look at the sky."
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "lines": [
+    {
+      "speaker": "Marco",
+      "type": "speech",
+      "text": "Panta rei, Stella. Everything flows. They taught us that at school.",
+      "speed": 40,
+      "delay": 1.0
+    },
+    {
+      "speaker": "Marco",
+      "type": "speech",
+      "text": "One of those established truths you end up accepting without batting an eye, maybe without ever really asking yourself what it means.",
+      "speed": 30,
+      "delay": 1.5
+    }
+  ]
+}

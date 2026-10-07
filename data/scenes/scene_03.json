@@ -1,0 +1,14 @@
+{
+  "id": "scene_03",
+  "type": "dialogue_interlude",
+  "transition_in": {
+    "type": "fade_from_black",
+    "duration": 1.5
+  },
+  "transition_out": {
+    "type": "fade_to_black",
+    "duration": 1.5
+  },
+  "auto_delay": 1.5,
+  "background": "black"
+}
