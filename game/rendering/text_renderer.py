@@ -6,6 +6,7 @@ class TextRenderer:
 
     def __init__(self, assets):
         self.font = assets.font("ui_dialogue", size=17)
+        self.speaker_font = assets.font("ui_dialogue", size=21)
         self.thought_font = assets.font("ui_thought", size=15)
         self.thought_font.set_italic(True)
         self.help_font = assets.font("ui_help", size=14)
@@ -36,7 +37,7 @@ class TextRenderer:
         screen.blit(box, rect.topleft)
         speaker = line.get("speaker", "")
         if speaker:
-            screen.blit(self.font.render(speaker, True, (210, 210, 210)), (rect.x + 13, rect.y + 7))
+            screen.blit(self.speaker_font.render(speaker, True, (210, 210, 210)), (rect.x + 13, rect.y + 7))
         lines = self._wrap(dialogue.visible_text, self.font, rect.width - 26)
         for index, text in enumerate(lines):
             surface = self.font.render(text, True, (245, 245, 245))
@@ -81,5 +82,5 @@ class TextRenderer:
         box = pygame.Surface((surface.get_width()+2*padding_x, surface.get_height()+2*padding_y), pygame.SRCALPHA)
         box.fill((0, 0, 0, 190))
         x = (screen.get_width() - box.get_width()) // 2
-        y = screen.get_height() - box.get_height() - 14
+        y = 14
         screen.blit(box, (x, y)); screen.blit(surface, (x+padding_x, y+padding_y))

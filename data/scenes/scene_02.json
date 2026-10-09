@@ -49,10 +49,10 @@
       }
     },
     "stella_placement": {
-      "scale": 0.82,
+      "scale": 0.58,
       "offset": [
-        12,
-        -8
+        -61,
+        4
       ]
     }
   }

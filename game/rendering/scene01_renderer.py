@@ -9,7 +9,7 @@ class Scene01Renderer:
     """
 
     MARCO_POS = (115, 190)
-    STELLA_POS = (190, 205)
+    STELLA_POS = (188, 197)
     TITLE_Y = 55
 
     WATER_FRAME_COUNT = 4

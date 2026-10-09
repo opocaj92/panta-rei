@@ -28,7 +28,7 @@ class Scene09(Scene):
         self.kiss_flash_size = None
 
     def help_needed(self):
-        return self.phase in (self.APPROACHING, self.SEPARATING) and not self.dragging
+        return self.phase in (self.APPROACHING, self.SEPARATING)
 
     @property
     def interaction_cfg(self):

@@ -20,7 +20,7 @@ class Scene08(Scene):
         self.completion_timer = CompletionTimer()
 
     def help_needed(self):
-        return not self.transition_started and not self.dragging
+        return not self.transition_started
 
     def enter(self):
         # Preserve the exact camera position passed by Scene 07.
@@ -68,7 +68,7 @@ class Scene08(Scene):
         max_zoom = float(approach_cfg.get("max_safe_zoom", 1.38))
         zoom = 1.0 + (max_zoom - 1.0) * self.display_approach
         self.renderer.render(screen, self.camera_y, self.elapsed, zoom=zoom,
-                             animate_phone=False, focus=(210, 235))
+                             animate_phone=False, focus=(110, 285))
 
         self.render_dialogue_or_thought(
             screen, dialogue_rect=pygame.Rect(51, 273, screen.get_width() - 102, 66)

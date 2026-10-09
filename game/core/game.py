@@ -14,7 +14,11 @@ class Game:
     def __init__(self):
         pygame.init()
         pygame.display.set_caption(WINDOW_TITLE)
-        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        # Keep all scene coordinates at 640x360; SDL scales the output and mouse input.
+        self.screen = pygame.display.set_mode(
+            (WINDOW_WIDTH, WINDOW_HEIGHT), pygame.FULLSCREEN | pygame.SCALED
+        )
+        self.fullscreen = True
         self.clock = pygame.time.Clock()
 
         self.input = InputManager()
@@ -26,8 +30,17 @@ class Game:
         self.scenes = SceneManager(self)
         self.running = True
 
-    def run(self):
-        self.scenes.change_scene("scene_01")
+    def update_cursor_visibility(self):
+        """Show the system pointer only for scenes requiring direct mouse dragging.
+
+        Scene 05 uses its own animated pointing hand instead of the OS cursor.
+        """
+        pygame.mouse.set_visible(
+            self.scenes.current_name in {"scene_08", "scene_09", "scene_10"}
+        )
+
+    def run(self, start_scene="scene_01", start_state=None):
+        self.scenes.change_scene(start_scene, state=start_state)
 
         while self.running:
             dt = self.clock.tick(FPS) / 1000.0
@@ -38,6 +51,21 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    if self.fullscreen:
+                        # Restore a normal, decorated 640x360 window.
+                        self.screen = pygame.display.set_mode(
+                            (WINDOW_WIDTH, WINDOW_HEIGHT),
+                        )
+                        self.fullscreen = False
+                    else:
+                        self.screen = pygame.display.set_mode(
+                            (WINDOW_WIDTH, WINDOW_HEIGHT),
+                            pygame.FULLSCREEN | pygame.SCALED,
+                        )
+                        self.fullscreen = True
+                    self.update_cursor_visibility()
+                    continue  # Escape only changes display mode, not scene input.
                 self.input.handle_event(event)
 
                 # Use the same dialogue keys everywhere, but never advance

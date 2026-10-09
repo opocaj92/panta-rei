@@ -4,8 +4,11 @@ from game.core.scene import Scene
 
 
 class DummyTextRenderer:
+    def __init__(self):
+        self.calls = []
+
     def help(self, screen, text):
-        pass
+        self.calls.append(text)
 
 
 class InteractiveScene(Scene):
@@ -19,36 +22,42 @@ class InteractiveScene(Scene):
 
 def make_scene(**config):
     game = SimpleNamespace(language="en", text_renderer=DummyTextRenderer())
-    base = {
-        "help": {"en": "Try the interaction.", "it": "Prova l'interazione."},
-        "help_delay": 2.0,
-        "help_duration": 1.0,
-    }
+    base = {"help": {"en": "Try the interaction.", "it": "Prova l'interazione."}}
     base.update(config)
     return InteractiveScene(game, base)
 
 
-def test_help_appears_after_inactivity():
+def test_help_appears_after_eight_seconds():
     scene = make_scene()
+    scene.update_help(7.0)
+    assert not scene.help_visible
     scene.update_help(1.0)
-    assert scene.help_timer == 0.0
-    scene.update_help(1.0)
-    assert scene.help_timer == 1.0
+    assert scene.help_visible
 
 
-def test_meaningful_progress_restarts_inactivity_clock():
+def test_progress_does_not_restart_countdown_or_dismiss_visible_help():
     scene = make_scene()
-    scene.update_help(1.5)
+    scene.update_help(5.0)
     scene.mark_help_progress()
-    scene.update_help(1.0)
-    assert scene.help_timer == 0.0
-    scene.update_help(1.0)
-    assert scene.help_timer == 1.0
+    scene.update_help(3.0)
+    assert scene.help_visible
+    scene.mark_help_progress()
+    scene.update_help(100.0)
+    assert scene.help_visible
+    scene.render_help(None)
+    assert scene.game.text_renderer.calls == ["Try the interaction."]
 
 
-def test_help_is_suppressed_when_player_action_is_not_required():
+def test_help_disappears_only_when_no_longer_needed():
     scene = make_scene()
+    scene.update_help(8.0)
     scene.waiting = False
-    scene.update_help(10.0)
-    assert scene.help_timer == 0.0
+    scene.update_help(0.1)
+    assert not scene.help_visible
+    assert scene.help_inactivity == 0.0
+
+
+def test_negative_delta_does_not_advance_help():
+    scene = make_scene()
+    scene.update_help(-5.0)
     assert scene.help_inactivity == 0.0

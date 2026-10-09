@@ -53,13 +53,7 @@ class Scene02(Scene):
         return self.progress_complete and self.dialogue_started and not self.transition_started
 
     def help_needed(self):
-        # Observation is active progress: suppress hints for the entire hold,
-        # including the frame before the attention counter is updated.
-        if self.progress_complete:
-            return False
-        if not self.stella_seen:
-            return self.current_view != self.stella_view
-        return self.current_view != self.river_view
+        return not self.progress_complete
 
     def enter(self):
         self.renderer.reset()
@@ -67,6 +61,13 @@ class Scene02(Scene):
 
     def handle_input(self, event):
         if self.progress_complete or event.type != pygame.KEYDOWN:
+            return
+
+        # While looking at the sky, only Down/S can return to the
+        # previous horizontal view. Ignore sideways (and Up) navigation.
+        if self.current_view == self.sky_view and event.key not in (
+            pygame.K_DOWN, pygame.K_s
+        ):
             return
 
         requested_view = self.gaze.handle_key(event.key)

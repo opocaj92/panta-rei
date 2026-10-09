@@ -98,6 +98,7 @@ class SceneManager:
         self.current_name = name
         self.current = next_scene
         self.current.enter()
+        self.game.update_cursor_visibility()
         if start_transition_in:
             self._start_transition_in(config.get("transition_in"))
 

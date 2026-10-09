@@ -23,7 +23,7 @@ class Scene10(Scene):
         return self.config.get('interaction', {})
 
     def help_needed(self):
-        return not self.dragging and not self.connected and not self.transition_started
+        return not self.connected and not self.transition_started
 
     def enter(self):
         self.game.dialogue.load('scene_10')

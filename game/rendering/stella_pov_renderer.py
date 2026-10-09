@@ -10,6 +10,7 @@ class StellaPOVRenderer:
     # Marco's default height is 245 px; both placement and size can be
     # overridden by each scene's presentation.marco configuration.
     MARCO_BREATHING_FPS = 3.2
+    FOREGROUND_FPS = 1.50
     MARCO_HEIGHT = 245
     MARCO_LEFT = 132
     MARCO_BOTTOM = 445
@@ -25,6 +26,10 @@ class StellaPOVRenderer:
         self.marco_bottom = int(marco.get("bottom", self.MARCO_BOTTOM))
         self.phone_glass_rect = tuple(presentation.get("phone_glass_rect", self.PHONE_GLASS_RECT))
         self.world = self._load('scene_07/background.png', (640, 720), alpha=False)
+        self.foreground = [
+            self._load(f'scene_07/foreground_{i:02d}.png', (640, 720))
+            for i in range(1, 5)
+        ]
         self.phone = [self._load(f'scene_07/stella_phone_{i:02d}.png', (640, 360)) for i in range(1, 9)]
         self.marco = [self._prepare_marco(self._load(f'scene_07/marco_breathing_{i:02d}.png', (640, 360))) for i in range(1, 5)]
 
@@ -42,7 +47,7 @@ class StellaPOVRenderer:
         target_w = round(cropped.get_width() * self.marco_height / cropped.get_height())
         return pygame.transform.scale(cropped, (target_w, self.marco_height))
 
-    def render(self, screen, camera_y, elapsed=0.0, zoom=1.0, animate_phone=True, focus=None):
+    def render(self, screen, camera_y, elapsed=0.0, zoom=1.0, animate_phone=True, focus=None, show_phone=True):
         """Render one continuous world; sprites live at fixed WORLD coordinates.
 
         Marco and the phone are animated in the full 640x720 world on every
@@ -72,13 +77,14 @@ class StellaPOVRenderer:
         # cropping the camera viewport. They keep playing even off-screen.
         # This also lets Marco straddle the y=360 boundary without clipping.
         world_frame = self.world.copy()
+        foreground_index = int(elapsed * self.FOREGROUND_FPS) % len(self.foreground)
+        world_frame.blit(self.foreground[foreground_index], (0, 0))
         marco_frame = self.marco[int(elapsed * self.MARCO_BREATHING_FPS) % len(self.marco)]
-        # False freezes the phone on its first frame, rather than removing it.
-        phone_index = int(elapsed * 5) % len(self.phone) if animate_phone else 0
-        phone_frame = self.phone[phone_index]
         marco_y = self.marco_bottom - marco_frame.get_height()
         world_frame.blit(marco_frame, (self.marco_left, marco_y))
-        world_frame.blit(phone_frame, (0, 360))
+        if show_phone:
+            phone_index = int(elapsed * 5) % len(self.phone) if animate_phone else 0
+            world_frame.blit(self.phone[phone_index], (0, 360))
         # Crop only after all sprites have been composited in world space.
         frame = world_frame.subsurface(view).copy()
         if frame.get_size() != (width, height):

@@ -1,12 +1,24 @@
 """Scene 11: continuous vertical panorama with Scene 02 animation layers."""
+import json
 import random
 import pygame
+from game.core.config import DATA_DIR
 from game.rendering.scene02_renderer import Scene02Renderer
 
 
 class Scene11Renderer(Scene02Renderer):
     def __init__(self, assets, config):
-        super().__init__(assets, config)
+        # Scene 02 is the single source of truth for Stella's placement.
+        # Keep Scene 11's other presentation settings independent.
+        scene02_path = DATA_DIR / "scenes" / "scene_02.json"
+        with scene02_path.open("r", encoding="utf-8") as source:
+            scene02_config = json.load(source)
+        placement = scene02_config.get("presentation", {}).get("stella_placement", {})
+        merged_config = dict(config)
+        presentation = dict(config.get("presentation", {}))
+        presentation["stella_placement"] = placement
+        merged_config["presentation"] = presentation
+        super().__init__(assets, merged_config)
         self.world_background = self._require(assets, "scene11.background", "scene_11/background.png")
         if self.world_background.get_size() != (640, 720):
             raise ValueError("Scene 11 panorama must be 640x720")
@@ -35,7 +47,7 @@ class Scene11Renderer(Scene02Renderer):
         # Top: background -> animated sky. Bottom: background -> grass -> Stella.
         world.blit(self.sky_animation.current_frame, (0, 0))
         world.blit(self.stella_foreground_animation.current_frame, (0, 360))
-        character = self.facing_frames[int(self.elapsed * (2.0 * len(self.facing_frames) * self.STELLA_IDLE_FPS / len(self.stella_idle_frames))) % len(self.facing_frames)]
+        character = self.facing_frames[int(self.elapsed * (len(self.facing_frames) * self.STELLA_IDLE_FPS / len(self.stella_idle_frames))) % len(self.facing_frames)]
         scale = self.stella_character_scale
         w, h = character.get_size()
         character = pygame.transform.smoothscale(character, (round(w * scale), round(h * scale)))

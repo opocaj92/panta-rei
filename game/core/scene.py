@@ -4,16 +4,16 @@ class Scene:
     Subclasses keep ownership of narrative state and mechanics. This base class
     intentionally provides only lifecycle hooks plus the cross-scene help timer.
     Interactive scenes opt into automatic help by overriding ``help_needed`` and
-    call ``mark_help_progress`` whenever the player meaningfully advances.
+    may call ``mark_help_progress`` for backwards compatibility; progress no longer
+    resets the hint once its countdown has started.
     """
 
-    HELP_DELAY = 5.0
-    HELP_DURATION = 3.0
+    HELP_DELAY = 8.0
 
     def __init__(self, game, config):
         self.game = game
         self.config = config
-        self.help_timer = 0.0
+        self.help_visible = False
         self.help_inactivity = 0.0
         self.incoming_state = {}
         self.transition_started = False
@@ -60,25 +60,21 @@ class Scene:
         return False
 
     def mark_help_progress(self):
-        """Restart the inactivity clock after meaningful progress toward completion."""
-        self.help_inactivity = 0.0
-        self.help_timer = 0.0
+        """Compatibility hook: progress no longer dismisses or delays help."""
+        pass
 
     def update_help(self, dt):
+        # The scene's completion criterion alone controls disappearance.
         if not self.get_help_text() or not self.help_needed():
             self.help_inactivity = 0.0
-            self.help_timer = 0.0
+            self.help_visible = False
             return
 
-        if self.help_timer > 0.0:
-            self.help_timer = max(0.0, self.help_timer - dt)
-            return
-
-        self.help_inactivity += max(0.0, dt)
-        delay = float(self.config.get("help_delay", self.HELP_DELAY))
-        if self.help_inactivity >= delay:
-            self.help_timer = float(self.config.get("help_duration", self.HELP_DURATION))
-            self.help_inactivity = 0.0
+        if not self.help_visible:
+            self.help_inactivity += max(0.0, dt)
+            delay = float(self.config.get("help_delay", self.HELP_DELAY))
+            if self.help_inactivity >= delay:
+                self.help_visible = True
 
     def get_help_text(self):
         """Resolve this scene's help text using the active language and fallbacks."""
@@ -91,7 +87,7 @@ class Scene:
         return help_cfg.get(language) or help_cfg.get("en") or help_cfg.get("it")
 
     def render_help(self, screen):
-        if self.help_timer > 0.0:
+        if self.help_visible:
             self.game.text_renderer.help(screen, self.get_help_text())
 
     def render_dialogue_or_thought(self, screen, *, dialogue_rect=None):

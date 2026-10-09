@@ -43,6 +43,22 @@ class Scene12(Scene):
         font.set_italic(italic)
         return font
 
+    @staticmethod
+    def _outlined_text(font, label, color, outline=(8, 13, 25), radius=1):
+        """Render crisp text with a dark one-pixel outline on a transparent surface."""
+        glyph = font.render(label, True, color).convert_alpha()
+        edge = font.render(label, True, outline).convert_alpha()
+        result = pygame.Surface(
+            (glyph.get_width() + radius * 2, glyph.get_height() + radius * 2),
+            pygame.SRCALPHA,
+        )
+        for dy in range(-radius, radius + 1):
+            for dx in range(-radius, radius + 1):
+                if dx or dy:
+                    result.blit(edge, (radius + dx, radius + dy))
+        result.blit(glyph, (radius, radius))
+        return result
+
     def _build_credits(self):
         language = getattr(self.game, 'language', 'en')
         entries = self.config.get('credits_by_language', {}).get(language)
@@ -58,7 +74,7 @@ class Scene12(Scene):
                 font, color, gap = self._font(12), (244, 241, 232), 26
             else:
                 font, color, gap = self._font(10, True), (195, 201, 213), 26
-            surf = font.render(label, True, color)
+            surf = self._outlined_text(font, label, color)
             # Guard against clipping long names on the narrow screen.
             if surf.get_width() > self.GLASS.width - 10:
                 scale = (self.GLASS.width - 10) / surf.get_width()
@@ -104,13 +120,13 @@ class Scene12(Scene):
         camera_y = float(self.config.get('camera_y', 360.0))
         # Keep the existing world, Marco and scene framing, but replace the
         # animated dog-video phone with a dedicated static credits phone.
-        self.renderer.render(screen, camera_y, self.elapsed, animate_phone=False)
+        self.renderer.render(screen, camera_y, self.elapsed, show_phone=False)
         screen.blit(self.phone_overlay, (0, 0))
         old_clip = screen.get_clip()
         screen.set_clip(self.GLASS)
         if self.phase in ('title', 'final'):
-            title = self._font(18).render('PANTA REI', True, (246, 241, 228))
-            subtitle = self._font(10, True).render('A game by Jacopo Castellini', True, (180, 194, 209))
+            title = self._outlined_text(self._font(18), 'PANTA REI', (246, 241, 228))
+            subtitle = self._outlined_text(self._font(10, True), 'A game by Jacopo Castellini', (180, 194, 209))
             if subtitle.get_width() > self.GLASS.width - 8:
                 subtitle = pygame.transform.smoothscale(subtitle, (self.GLASS.width - 8, subtitle.get_height()))
             # Fade in on opening, fade in again on final title.
