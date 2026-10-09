@@ -12,7 +12,7 @@
   "world": "river_estuary",
   "camera_start": [
     0,
-    1500
+    581
   ],
   "camera_speed": 360.0,
   "estuary": {

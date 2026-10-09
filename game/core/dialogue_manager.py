@@ -1,4 +1,5 @@
 import json
+import math
 
 from .config import DATA_DIR
 
@@ -25,7 +26,8 @@ class DialogueManager:
             raise FileNotFoundError(f"Missing dialogue for {scene_name!r}: {localized} (fallback: {fallback})")
 
         with path.open("r", encoding="utf-8") as f:
-            self.lines = json.load(f).get("lines", [])
+            data = json.load(f)
+        self.lines = validate_dialogue(data, str(path))
 
         self.index = 0
         self.visible_characters = 0.0
@@ -57,7 +59,7 @@ class DialogueManager:
             speed = float(line.get("speed", 40.0))
             self.visible_characters = min(
                 len(line["text"]),
-                self.visible_characters + speed * dt,
+                self.visible_characters + speed * max(0.0, dt),
             )
 
     def advance(self):
@@ -70,3 +72,21 @@ class DialogueManager:
         self.visible_characters = 0.0
         if self.index >= len(self.lines):
             self.finished = True
+
+
+def validate_dialogue(data, source="dialogue"):
+    """Validate authored lines before the typewriter accesses their fields."""
+    if not isinstance(data, dict) or "lines" not in data or not isinstance(data["lines"], list):
+        raise ValueError(f"{source}: expected an object containing a lines list")
+    lines = data["lines"]
+    for index, line in enumerate(lines):
+        label = f"{source}.lines[{index}]"
+        if not isinstance(line, dict) or not isinstance(line.get("text"), str):
+            raise ValueError(f"{label}.text must be a string")
+        if "speed" in line:
+            speed = line["speed"]
+            if isinstance(speed, bool) or not isinstance(speed, (int, float)) or not math.isfinite(speed) or speed <= 0:
+                raise ValueError(f"{label}.speed must be a positive finite number")
+        if "type" in line and line["type"] not in ("dialogue", "speech", "thought", "plain"):
+            raise ValueError(f"{label}.type is unknown: {line['type']!r}")
+    return lines

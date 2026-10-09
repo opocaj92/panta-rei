@@ -1,6 +1,6 @@
 # Panta Rei
 
-A small 2D narrative game built with Python and Pygame. The current project is a complete 12-scene prototype using procedural placeholder visuals so final art, animation, audio, and typography can be replaced without rewriting narrative logic.
+A small 2D narrative game built with Python and Pygame. The current project is a 12-scene narrative game combining authored pixel-art assets, animations, and reusable scene systems. Some presentation details may still be refined.
 
 ## Run
 
@@ -17,7 +17,7 @@ At startup the game reads the system locale. Italian locales use Italian; every 
 
 ## Contextual help
 
-Press **H** in an interactive scene to show a control-only hint for about three seconds. Hints explain how to interact, not how to solve the scene. Non-interactive scenes have no hint.
+Interactive scenes automatically display a localized control hint after a period without meaningful progress. Hints disappear after a few seconds or when the player makes progress; non-interactive scenes have no hint.
 
 ## Scenes
 

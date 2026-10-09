@@ -1,36 +1,21 @@
-from game.core.scene import Scene
+from game.scenes.black_screen_dialogue import BlackScreenDialogueScene
+from game.core.timing import CompletionTimer
 
 
-class Scene06(Scene):
-    """Black-screen interlude: Marco checks whether Stella is listening."""
+class Scene06(BlackScreenDialogueScene):
+    """Interlude whose exit delay begins only after dialogue completion."""
 
     def __init__(self, game, config):
-        super().__init__(game, config)
-        self.post_dialogue_elapsed = 0.0
-        self.transition_started = False
+        super().__init__(game, config, "scene_06")
+        self.completion_timer = CompletionTimer()
 
     def enter(self):
-        self.game.dialogue.load("scene_06")
+        super().enter()
+        self.completion_timer.reset()
 
     def update(self, dt):
-        self.game.dialogue.update(dt)
-
+        super().update(dt)
         if self.game.dialogue.finished and not self.transition_started:
-            self.post_dialogue_elapsed += dt
-            delay = float(self.config.get("post_dialogue_delay", 1.0))
-
-            if self.post_dialogue_elapsed >= delay:
-                self.transition_started = True
-                self.game.scenes.change_scene(
-                    self.config.get("next_scene", "scene_07"),
-                    transition_config=self.config.get("transition_out"),
-                )
-
-    def render(self, screen):
-        screen.fill((0, 0, 0))
-        self.game.text_renderer.plain(
-            screen,
-            self.game.dialogue,
-            position=self.config.get("text_position", "center"),
-            max_width=int(self.config.get("text_max_width", 760)),
-        )
+            elapsed = self.completion_timer.update(dt, active=True)
+            if elapsed >= float(self.config.get("post_dialogue_delay", 1.0)):
+                self.advance_to(self.config.get("next_scene", "scene_07"))

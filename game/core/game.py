@@ -40,15 +40,20 @@ class Game:
                     self.running = False
                 self.input.handle_event(event)
 
-                # Dialogue progression is a global interaction: the same keys
-                # reveal/advance text regardless of which scene presents it.
+                # Use the same dialogue keys everywhere, but never advance
+                # lines a scene has not yet made available to the player.
                 if (
                     event.type == pygame.KEYDOWN
                     and event.key in (pygame.K_RETURN, pygame.K_BACKSPACE)
                 ):
-                    self.dialogue.advance()
+                    scene = self.scenes.current
+                    if scene is not None and scene.allows_dialogue_advance():
+                        self.dialogue.advance()
 
+                active_before = self.scenes.current
                 self.scenes.handle_input(event)
+                if self.scenes.current is not active_before:
+                    break  # Do not dispatch buffered events to the newly entered scene.
 
             self.scenes.update(dt)
             self.transitions.update(dt)

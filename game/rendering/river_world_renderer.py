@@ -1,14 +1,32 @@
 import pygame
 
 
+
+
 class RiverWorldRenderer:
     """Prototype renderer shared by the river-navigation and estuary scenes."""
 
-    def __init__(self, world_width, world_height, river_points):
+    def __init__(self, world_width, world_height, river_points, assets):
+        self.assets = assets
         self.world_width = int(world_width)
         self.world_height = int(world_height)
         self.river_points = list(river_points)
-        self.world_surface = self._build_world_surface()
+        self.frames = self._load_frames()
+        self.world_surface = None if self.frames else self._build_world_surface()
+
+    def _load_frames(self):
+        """Load aligned full-map animation frames, shared by Scenes 04 and 05."""
+        from game.core.config import ASSETS_DIR
+        folder = ASSETS_DIR / "scene_04"
+        paths = [folder / f"scene04_river_{i:02d}.png" for i in range(1, 5)]
+        if not all(path.is_file() for path in paths):
+            return []
+        frames = [self.assets.image(f"scene_04/river_{i:02d}", f"scene_04/scene04_river_{i:02d}.png", alpha=False, required=True) for i in range(1, 5)]
+        expected = (self.world_width, self.world_height)
+        if any(frame.get_size() != expected for frame in frames):
+            raise ValueError(f"Scene 04 animation frames must be {expected}")
+        return frames
+
 
     def _build_world_surface(self):
         surface = pygame.Surface((self.world_width, self.world_height))
@@ -21,9 +39,15 @@ class RiverWorldRenderer:
     def render(self, screen, camera, flow_time=0.0, draw_flow=True):
         width, height = screen.get_size()
         camera_rect = pygame.Rect(round(camera.x), round(camera.y), width, height)
-        screen.blit(self.world_surface, (0, 0), camera_rect)
-        if draw_flow:
-            self._draw_flow_marks(screen, camera, flow_time)
+        if self.frames:
+            # Full-map frames already contain the animated river current.
+            # No procedural arrows or flow marks should be drawn over them.
+            frame = self.frames[int(flow_time * 1.5) % len(self.frames)]
+            screen.blit(frame, (0, 0), camera_rect)
+        else:
+            screen.blit(self.world_surface, (0, 0), camera_rect)
+            if draw_flow:
+                self._draw_flow_marks(screen, camera, flow_time)
 
     def _draw_flow_marks(self, screen, camera, flow_time):
         segments = list(zip(self.river_points[:-1], self.river_points[1:]))

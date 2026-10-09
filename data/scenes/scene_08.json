@@ -2,8 +2,8 @@
   "id": "scene_08",
   "type": "stella_optional_approach",
   "approach": {
-    "drag_sensitivity": 0.0018,
-    "max_safe_zoom": 1.62
+    "drag_sensitivity": 0.0028,
+    "max_safe_zoom": 1.38
   },
   "post_dialogue_delay": 1.0,
   "next_scene": "scene_09",
@@ -15,8 +15,21 @@
     "type": "eye_blink",
     "duration": 1.2
   },
+  "presentation": {
+    "marco": {
+      "height": 245,
+      "left": 132,
+      "bottom": 445
+    },
+    "phone_glass_rect": [
+      265,
+      92,
+      110,
+      170
+    ]
+  },
   "help": {
-    "it": "Tieni premuto e trascina il mouse verso Marco per avvicinarti.",
-    "en": "Hold and drag the mouse toward Marco to move closer."
+    "it": "Trascina verso l’alto per avvicinarti a Marco.",
+    "en": "Drag upward to move closer to Marco."
   }
 }

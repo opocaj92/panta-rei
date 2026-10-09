@@ -2,10 +2,10 @@
   "id": "scene_09",
   "type": "mirrored_silhouettes",
   "interaction": {
-    "start_separation": 260.0,
-    "final_separation": 260.0,
-    "join_threshold": 4.0,
-    "grab_radius": 105.0,
+    "start_separation": 118.0,
+    "final_separation": 118.0,
+    "join_threshold": 2.0,
+    "grab_radius": 65.0,
     "drag_sensitivity": 1.0,
     "joined_lock_duration": 2.0
   },
@@ -19,7 +19,7 @@
     "duration": 1.2
   },
   "help": {
-    "it": "Trascina una sagoma lungo la linea; l’altra si muoverà simmetricamente.",
-    "en": "Drag either silhouette along the line; the other moves symmetrically."
+    "it": "Trascina una sagoma verso l’altra per avvicinarle. Dopo il bacio, trascinale per separarle.",
+    "en": "Drag either silhouette inward to bring them closer. After the kiss, drag outward to separate them."
   }
 }

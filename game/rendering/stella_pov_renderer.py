@@ -1,105 +1,95 @@
+"""Scene 07/08: shared 640x720 painted environment and transparent sprites."""
 import math
 import pygame
 
 
 class StellaPOVRenderer:
-    """Prototype tall composition shared by Stella-POV scenes."""
+    WORLD_WIDTH = 640
+    WORLD_HEIGHT = 720
+    # Marco sits on the near-bank dirt path; his feet are in the lower world half.
+    # Marco's default height is 245 px; both placement and size can be
+    # overridden by each scene's presentation.marco configuration.
+    MARCO_BREATHING_FPS = 3.2
+    MARCO_HEIGHT = 245
+    MARCO_LEFT = 132
+    MARCO_BOTTOM = 445
+    # Local coordinates in the 640x360 phone artwork; adjustable for credits.
+    PHONE_GLASS_RECT = (265, 92, 110, 170)
 
-    WORLD_WIDTH = 1000
-    WORLD_HEIGHT = 1200
-    PHONE_SCREEN_WORLD_RECT = pygame.Rect(416, 710, 168, 295)
+    def __init__(self, config=None, assets=None):
+        self.assets = assets
+        presentation = (config or {}).get("presentation", {})
+        marco = presentation.get("marco", {})
+        self.marco_height = int(marco.get("height", self.MARCO_HEIGHT))
+        self.marco_left = int(marco.get("left", self.MARCO_LEFT))
+        self.marco_bottom = int(marco.get("bottom", self.MARCO_BOTTOM))
+        self.phone_glass_rect = tuple(presentation.get("phone_glass_rect", self.PHONE_GLASS_RECT))
+        self.world = self._load('scene_07/background.png', (640, 720), alpha=False)
+        self.phone = [self._load(f'scene_07/stella_phone_{i:02d}.png', (640, 360)) for i in range(1, 9)]
+        self.marco = [self._prepare_marco(self._load(f'scene_07/marco_breathing_{i:02d}.png', (640, 360))) for i in range(1, 5)]
 
-    def __init__(self):
-        self.world = pygame.Surface((self.WORLD_WIDTH, self.WORLD_HEIGHT))
-        self._build_static_world()
+    def _load(self, name, size, alpha=True):
+        image = self.assets.image(name, name, alpha=alpha, required=True)
+        if image.get_size() != size:
+            raise ValueError(f"{name}: expected {size}, got {image.get_size()}")
+        return image
 
-    def _build_static_world(self):
-        surface = self.world
-        surface.fill((11, 19, 31))
+    def _prepare_marco(self, source):
+        # Crop the transparent margins before scaling; otherwise his actual
+        # character size depends on empty pixels in the 640x360 source frame.
+        bounds = source.get_bounding_rect(min_alpha=8)
+        cropped = source.subsurface(bounds).copy()
+        target_w = round(cropped.get_width() * self.marco_height / cropped.get_height())
+        return pygame.transform.scale(cropped, (target_w, self.marco_height))
 
-        # Upper half: Marco isolated in Stella's attention. This deliberately
-        # mirrors Scene 02's character-focused Stella view: no river or landscape
-        # background competing with the person she has just looked up at.
-        stars = [
-            (65, 70), (145, 125), (230, 55), (315, 105), (405, 65),
-            (520, 130), (620, 55), (705, 110), (815, 75), (925, 130),
-        ]
-        for x, y in stars:
-            pygame.draw.circle(surface, (220, 220, 210), (x, y), 2)
+    def render(self, screen, camera_y, elapsed=0.0, zoom=1.0, animate_phone=True, focus=None):
+        """Render one continuous world; sprites live at fixed WORLD coordinates.
 
-        # Marco: character-centric prototype framing, analogous to Stella in Scene 02.
-        pygame.draw.circle(surface, (205, 166, 145), (500, 255), 45)
-        pygame.draw.rect(surface, (54, 58, 70), (445, 300, 110, 155), border_radius=20)
-        pygame.draw.line(surface, (54, 58, 70), (470, 435), (425, 510), 24)
-        pygame.draw.line(surface, (54, 58, 70), (530, 435), (575, 510), 24)
-
-        # Lower half: Stella's lap/arms and phone dominate the starting frame.
-        pygame.draw.rect(surface, (20, 31, 40), (0, 600, 1000, 600))
-        pygame.draw.ellipse(surface, (74, 63, 78), (245, 880, 510, 330))
-        pygame.draw.line(surface, (198, 158, 145), (385, 880), (455, 800), 30)
-        pygame.draw.line(surface, (198, 158, 145), (615, 880), (545, 800), 30)
-
-        # Phone body. The video itself is animated in render().
-        pygame.draw.rect(surface, (14, 14, 18), (405, 690, 190, 340), border_radius=24)
-        pygame.draw.rect(surface, (42, 45, 54), self.PHONE_SCREEN_WORLD_RECT, border_radius=15)
-        pygame.draw.circle(surface, (9, 9, 11), (500, 1016), 6)
-
-
-    def phone_screen_rect(self, screen, camera_y, zoom=1.0):
-        """Return the phone glass rectangle in screen coordinates for this view."""
-        max_y = max(0, self.WORLD_HEIGHT - screen.get_height())
-        camera_y = max(0.0, min(float(camera_y), float(max_y)))
+        Marco and the phone are animated in the full 640x720 world on every
+        frame, including when outside the visible camera viewport.
+        """
+        width, height = screen.get_size()
         zoom = max(1.0, float(zoom))
-        view_w = screen.get_width() / zoom
-        view_h = screen.get_height() / zoom
-        center_x = self.WORLD_WIDTH / 2.0
-        center_y = camera_y + screen.get_height() / 2.0
-        left = max(0.0, min(center_x - view_w / 2.0, self.WORLD_WIDTH - view_w))
-        top = max(0.0, min(center_y - view_h / 2.0, self.WORLD_HEIGHT - view_h))
-        r = self.PHONE_SCREEN_WORLD_RECT
-        return pygame.Rect(
-            int(round((r.x - left) * zoom)), int(round((r.y - top) * zoom)),
-            int(round(r.width * zoom)), int(round(r.height * zoom)),
-        )
-
-    def render(self, screen, camera_y, elapsed=0.0, zoom=1.0, animate_phone=True):
-        max_y = max(0, self.WORLD_HEIGHT - screen.get_height())
-        camera_y = max(0.0, min(float(camera_y), float(max_y)))
-
-        zoom = max(1.0, float(zoom))
-        view_w = screen.get_width() / zoom
-        view_h = screen.get_height() / zoom
-        # Keep Marco centered while Stella approaches. The clamp below is the
-        # visual safety boundary: even at maximum configured zoom the viewport
-        # never crosses outside the authored world or lets the POV overlap Marco.
-        center_x = self.WORLD_WIDTH / 2.0
-        center_y = camera_y + screen.get_height() / 2.0
-        left = max(0.0, min(center_x - view_w / 2.0, self.WORLD_WIDTH - view_w))
-        top = max(0.0, min(center_y - view_h / 2.0, self.WORLD_HEIGHT - view_h))
-        viewport = pygame.Rect(int(round(left)), int(round(top)), int(round(view_w)), int(round(view_h)))
-        frame = self.world.subsurface(viewport)
-        if zoom == 1.0:
-            screen.blit(frame, (0, 0))
+        view_w, view_h = width / zoom, height / zoom
+        camera_y = max(0.0, min(float(camera_y), self.WORLD_HEIGHT - height))
+        if focus is None:
+            # Scene 07 retains its original centred camera movement.
+            cx = self.WORLD_WIDTH / 2
+            cy = camera_y + height / 2
+            left = cx - view_w / 2
+            top = cy - view_h / 2
         else:
-            screen.blit(pygame.transform.smoothscale(frame, screen.get_size()), (0, 0))
+            # Keep the chosen world-space point in the same screen position
+            # as we zoom, making the approach naturally favour Marco.
+            fx, fy = focus
+            progress = 1.0 - 1.0 / zoom
+            left = progress * fx
+            top = camera_y + progress * fy
+        left = max(0.0, min(left, self.WORLD_WIDTH - view_w))
+        top = max(0.0, min(top, self.WORLD_HEIGHT - view_h))
+        view = pygame.Rect(round(left), round(top), round(view_w), round(view_h))
+        # Compose BOTH animations into the entire 640x720 world BEFORE
+        # cropping the camera viewport. They keep playing even off-screen.
+        # This also lets Marco straddle the y=360 boundary without clipping.
+        world_frame = self.world.copy()
+        marco_frame = self.marco[int(elapsed * self.MARCO_BREATHING_FPS) % len(self.marco)]
+        # False freezes the phone on its first frame, rather than removing it.
+        phone_index = int(elapsed * 5) % len(self.phone) if animate_phone else 0
+        phone_frame = self.phone[phone_index]
+        marco_y = self.marco_bottom - marco_frame.get_height()
+        world_frame.blit(marco_frame, (self.marco_left, marco_y))
+        world_frame.blit(phone_frame, (0, 360))
+        # Crop only after all sprites have been composited in world space.
+        frame = world_frame.subsurface(view).copy()
+        if frame.get_size() != (width, height):
+            frame = pygame.transform.scale(frame, (width, height))
+        screen.blit(frame, (0, 0))
 
-        # Animated fake short-form video on the phone. Convert its world position
-        # into screen coordinates so it naturally leaves the viewport during the pan.
-        phone_screen_y = (710 - top) * zoom
-        if animate_phone and -295 < phone_screen_y < screen.get_height():
-            video_rect = pygame.Rect(416, int(phone_screen_y), 168, 295)
-            clip = screen.get_clip()
-            screen.set_clip(video_rect)
+    def phone_screen_rect(self, screen, camera_y):
+        """Phone glass bounds in viewport pixels for the unzoomed phone view.
 
-            phase = elapsed * 2.2
-            cx = 500 + int(34 * math.sin(phase))
-            cy = int(phone_screen_y + 135 + 22 * math.cos(phase * 1.4))
-            pygame.draw.rect(screen, (55, 76, 94), video_rect)
-            pygame.draw.circle(screen, (225, 178, 122), (cx, cy), 32)
-            pygame.draw.rect(screen, (120, 82, 135), (cx - 26, cy + 28, 52, 72), border_radius=12)
-            pygame.draw.rect(screen, (235, 235, 235), (430, int(phone_screen_y + 260), 118, 5), border_radius=2)
-            pygame.draw.circle(screen, (240, 240, 240), (563, int(phone_screen_y + 55)), 6)
-            pygame.draw.circle(screen, (240, 240, 240), (563, int(phone_screen_y + 87)), 6)
-            pygame.draw.circle(screen, (240, 240, 240), (563, int(phone_screen_y + 119)), 6)
-
-            screen.set_clip(clip)
+        The phone artwork begins at world y=360; the credit scene overlays
+        the glass without drawing outside its bounds.
+        """
+        x, y, w, h = self.phone_glass_rect
+        return pygame.Rect(x, round(360 + y - float(camera_y)), w, h)

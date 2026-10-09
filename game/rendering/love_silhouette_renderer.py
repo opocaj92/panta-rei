@@ -1,42 +1,55 @@
-import math
+"""Scene 09: two independent pixel-art sprites meet at their lip anchors."""
 import pygame
 
 
 class LoveSilhouetteRenderer:
-    """Abstract prototype visual for Scene 09's joining/separating metaphor."""
+    def __init__(self, assets):
+        self.background = assets.image("scene_09/cosmic_background", "scene_09/cosmic_background.png", alpha=False, required=True)
+        self.boy = assets.image("scene_09/marco_silhouette", "scene_09/marco_silhouette.png", alpha=True, required=True)
+        self.girl = assets.image("scene_09/stella_silhouette", "scene_09/stella_silhouette.png", alpha=True, required=True)
+        # Mouth-edge anchors, measured on opaque pixels (not mouth centres).
+        # The y coordinates also account for Stella's seven pixels of transparent
+        # padding below her visible feet, so both figures stand on the window edge.
+        self.boy_lip = (199, 96)
+        self.girl_lip = (70, 89)
+        self.boy_bottom = self.boy.get_bounding_rect(min_alpha=30).bottom
+        self.girl_bottom = self.girl.get_bounding_rect(min_alpha=30).bottom
+        self._scaled_backgrounds = {}
+
+    def anchors(self, screen, separation):
+        cx = screen.get_width() // 2
+        # At zero separation, the rightmost lip pixel of Marco meets the
+        # leftmost lip pixel of Stella; do not align their mouth centres.
+        return cx - separation, cx + separation
+
+    def rects(self, screen, separation):
+        left_x, right_x = self.anchors(screen, separation)
+        # Place the actual visible bottom edge, not the transparent PNG canvas,
+        # on the last row of the viewport.
+        boy_y = screen.get_height() - self.boy_bottom
+        girl_y = screen.get_height() - self.girl_bottom
+        return (pygame.Rect(round(left_x - self.boy_lip[0]), boy_y, *self.boy.get_size()),
+                pygame.Rect(round(right_x - self.girl_lip[0] + 1), girl_y, *self.girl.get_size()))
+
+    def side_at(self, screen, pos, separation):
+        boy, girl = self.rects(screen, separation)
+        # Test visible alpha rather than a centre-distance circle.
+        for side, rect, sprite in (("left", boy, self.boy), ("right", girl, self.girl)):
+            if rect.collidepoint(pos):
+                x, y = pos[0] - rect.left, pos[1] - rect.top
+                if sprite.get_at((x, y)).a > 30:
+                    return side
+        return None
 
     def render(self, screen, separation, phase, elapsed):
-        w, h = screen.get_size()
-        screen.fill((31, 18, 40))
-
-        # Soft abstract background: nested hearts/ripples and drifting motes.
-        center = (w // 2, h // 2 - 20)
-        for i in range(5, 0, -1):
-            radius = 55 + i * 42 + int(4 * math.sin(elapsed * 1.3 + i))
-            color = (54 + i * 5, 31 + i * 4, 61 + i * 6)
-            pygame.draw.circle(screen, color, center, radius, width=2)
-        for i in range(18):
-            x = int((i * 97 + elapsed * (8 + i % 3)) % (w + 60) - 30)
-            y = 70 + (i * 61) % max(100, h - 150)
-            pygame.draw.circle(screen, (116, 82, 121), (x, y), 2)
-
-        half_span = int(separation)
-        boy_x = w // 2 - half_span
-        girl_x = w // 2 + half_span
-        y = h // 2 + 25
-
-        pulse = 1.0
-        if phase == "joined":
-            pulse = 1.0 + 0.055 * math.sin(elapsed * 8.0)
-
-        self._draw_person(screen, boy_x, y, (77, 132, 196), pulse)
-        self._draw_person(screen, girl_x, y, (214, 104, 157), pulse)
-
-    def _draw_person(self, screen, x, y, color, scale):
-        head_r = int(30 * scale)
-        body_w = int(66 * scale)
-        body_h = int(150 * scale)
-        pygame.draw.circle(screen, color, (x, y - int(105 * scale)), head_r)
-        body = pygame.Rect(0, 0, body_w, body_h)
-        body.midtop = (x, y - int(72 * scale))
-        pygame.draw.ellipse(screen, color, body)
+        size = screen.get_size()
+        if size == self.background.get_size():
+            bg = self.background
+        else:
+            if size not in self._scaled_backgrounds:
+                self._scaled_backgrounds[size] = pygame.transform.scale(self.background, size)
+            bg = self._scaled_backgrounds[size]
+        screen.blit(bg, (0, 0))
+        boy, girl = self.rects(screen, separation)
+        screen.blit(self.boy, boy.topleft)
+        screen.blit(self.girl, girl.topleft)

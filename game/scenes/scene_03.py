@@ -1,41 +1,19 @@
-from game.core.scene import Scene
+from game.scenes.black_screen_dialogue import BlackScreenDialogueScene
 
 
-class Scene03(Scene):
-    """Black-screen interlude: 'Ma che vuol dire davvero...'"""
+class Scene03(BlackScreenDialogueScene):
+    """Interlude whose minimum duration is measured from scene entry."""
 
     def __init__(self, game, config):
-        super().__init__(game, config)
+        super().__init__(game, config, "scene_03")
         self.elapsed = 0.0
-        self.transition_started = False
 
     def enter(self):
+        super().enter()
         self.elapsed = 0.0
-        self.transition_started = False
-        self.game.dialogue.load("scene_03")
 
     def update(self, dt):
+        super().update(dt)
         self.elapsed += dt
-        self.game.dialogue.update(dt)
-
-        auto_delay = float(self.config.get("auto_delay", 1.5))
-        if (
-            self.elapsed >= auto_delay
-            and self.game.dialogue.finished
-            and not self.transition_started
-        ):
-            self.transition_started = True
-            self.game.scenes.change_scene(
-                "scene_04",
-                transition_config=self.config.get("transition_out"),
-            )
-
-    def render(self, screen):
-        # Game clears the frame to black before scene rendering.
-        screen.fill((0, 0, 0))
-        self.game.text_renderer.plain(
-            screen,
-            self.game.dialogue,
-            position=self.config.get("text_position", "center"),
-            max_width=int(self.config.get("text_max_width", 760)),
-        )
+        if self.elapsed >= float(self.config.get("auto_delay", 1.5)) and self.game.dialogue.finished:
+            self.advance_to("scene_04")

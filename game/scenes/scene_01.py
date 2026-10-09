@@ -1,7 +1,7 @@
 import pygame
 
 from game.core.scene import Scene
-from game.rendering.renderer import PrototypeRenderer
+from game.rendering.scene01_renderer import Scene01Renderer
 
 
 class Scene01(Scene):
@@ -9,22 +9,21 @@ class Scene01(Scene):
 
     def __init__(self, game, config):
         super().__init__(game, config)
-        self.renderer = PrototypeRenderer()
+        self.renderer = Scene01Renderer(self.game.assets)
         self.elapsed = 0.0
         self.title_alpha = 0.0
         self.title_state = "WAITING"
         self.title_hold_timer = 0.0
-        self.transition_started = False
-        self.title_font = self.game.assets.font("title", size=96)
 
     def enter(self):
         self.elapsed = 0.0
         self.title_alpha = 0.0
         self.title_state = "WAITING"
         self.title_hold_timer = 0.0
-        self.transition_started = False
+        self.renderer.reset()
 
     def update(self, dt):
+        self.renderer.update(dt)
         self.elapsed += dt
         title = self.config.get("title", {})
         delay = float(title.get("delay", 2.0))
@@ -53,23 +52,7 @@ class Scene01(Scene):
 
         auto_delay = float(self.config.get("auto_delay", 7.0))
         if self.elapsed >= auto_delay and not self.transition_started:
-            self.transition_started = True
-            self.game.scenes.change_scene(
-                "scene_02",
-                transition_config=self.config.get("transition_out"),
-            )
+            self.request_transition("scene_02")
 
     def render(self, screen):
-        self.renderer.background(screen, self.config.get("background", "lake"))
-
-        if self.title_alpha > 0:
-            title_surface = self.title_font.render(
-                self.config.get("title", {}).get("text", "Panta Rei"),
-                True,
-                (245, 245, 245),
-            )
-            title_surface.set_alpha(int(self.title_alpha))
-            title_rect = title_surface.get_rect(
-                center=(screen.get_width() // 2, screen.get_height() // 2)
-            )
-            screen.blit(title_surface, title_rect)
+        self.renderer.render(screen, title_alpha=self.title_alpha)

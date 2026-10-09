@@ -34,7 +34,6 @@ class Scene04(Scene):
         self.estuary_visible = False
         self.best_estuary_distance = float("inf")
         self.best_visible_fraction = 0.0
-        self.transition_started = False
         self.flow_time = 0.0
 
         self.river_points = [tuple(point) for point in world["river_points"]]
@@ -42,6 +41,7 @@ class Scene04(Scene):
             self.world_width,
             self.world_height,
             self.river_points,
+            self.game.assets,
         )
 
     def help_needed(self):
@@ -55,7 +55,12 @@ class Scene04(Scene):
 
         # Reaching the estuary does NOT lock navigation. The player may keep
         # moving while the remaining dialogue unfolds.
+        previous_camera = self.camera.copy()
         self._update_camera(dt)
+        # Moving the camera counts as activity, even if the player has not
+        # yet moved closer to the estuary. Only show help after inactivity.
+        if self.camera.distance_squared_to(previous_camera) > 0.0001:
+            self.mark_help_progress()
         self._check_estuary_visibility()
 
         self.game.dialogue.update(dt)
@@ -65,12 +70,7 @@ class Scene04(Scene):
             and self.game.dialogue.finished
             and not self.transition_started
         ):
-            self.transition_started = True
-            self.game.scenes.change_scene(
-                self.config.get("next_scene", "scene_05"),
-                transition_config=self.config.get("transition_out"),
-                state={"camera": [self.camera.x, self.camera.y]},
-            )
+            self.request_transition(self.config.get("next_scene", "scene_05"), state={"camera": [self.camera.x, self.camera.y], "flow_time": self.flow_time})
 
     def _update_camera(self, dt):
         direction = pygame.Vector2(0.0, 0.0)

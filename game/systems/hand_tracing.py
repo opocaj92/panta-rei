@@ -4,11 +4,14 @@ import pygame
 class HandTracingSystem:
     """Mouse-driven pointing hand with temporary, fading trace strokes."""
 
-    def __init__(self, config):
+    def __init__(self, config, assets):
         self.trace_lifetime = float(config.get("trace_lifetime", 2.8))
         self.trace_width = int(config.get("trace_width", 3))
         self.min_point_distance = float(config.get("min_point_distance", 5.0))
         self.hand_position = pygame.Vector2(0, 0)
+        self.arm_sprite = assets.image('scene_05/marco_pointing_arm', 'scene_05/marco_pointing_arm.png', required=True)
+        # Fingertip position in the cropped 360px-high sprite.
+        self.fingertip = pygame.Vector2(184, 2)
         self.tracing = False
         self.points = []  # [Vector2, age]
 
@@ -44,6 +47,13 @@ class HandTracingSystem:
             return
         self.points.append([pos, 0.0])
 
+    def has_visible_stroke(self):
+        """True once at least one segment meets the trace renderer's criteria."""
+        return any(
+            0 < self.points[i - 1][0].distance_to(self.points[i][0]) <= 34
+            for i in range(1, len(self.points))
+        )
+
     def render_trace(self, screen):
         if len(self.points) < 2:
             return
@@ -52,7 +62,7 @@ class HandTracingSystem:
             p0, age0 = self.points[i - 1]
             p1, age1 = self.points[i]
             # Do not connect strokes across a large mouse jump.
-            if p0.distance_to(p1) > 55:
+            if p0.distance_to(p1) > 34:
                 continue
             age = max(age0, age1)
             alpha = max(0, int(180 * (1.0 - age / self.trace_lifetime)))
@@ -60,17 +70,13 @@ class HandTracingSystem:
         screen.blit(trace_surface, (0, 0))
 
     def render_hand(self, screen):
-        """Simple prototype arm/hand; replace later with final animation asset."""
+        """Draw Marco's pointing arm with the fingertip at the mouse position.
+
+        The sprite extends below the viewport when the cursor is lower, so
+        pygame clips the unseen portion naturally.
+        """
         pos = self.hand_position
-        shoulder = pygame.Vector2(screen.get_width() * 0.5, screen.get_height() + 35)
-        pygame.draw.line(screen, (187, 145, 112), shoulder, pos, 34)
-        pygame.draw.circle(screen, (205, 162, 126), (round(pos.x), round(pos.y)), 18)
-        # Pointing finger extends slightly beyond the hand toward the cursor.
-        direction = pos - shoulder
-        if direction.length_squared() == 0:
-            direction = pygame.Vector2(0, -1)
-        else:
-            direction = direction.normalize()
-        tip = pos + direction * 32
-        pygame.draw.line(screen, (205, 162, 126), pos, tip, 10)
-        pygame.draw.circle(screen, (205, 162, 126), (round(tip.x), round(tip.y)), 5)
+        screen.blit(self.arm_sprite, (
+            round(pos.x - self.fingertip.x),
+            round(pos.y - self.fingertip.y),
+        ))

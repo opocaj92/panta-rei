@@ -13,6 +13,11 @@ class PrototypeRenderer:
         self.title_font = pygame.font.Font(None, 36)
 
     def background(self, screen, kind):
+        legacy = pygame.Surface((1000, 600))
+        self._background_legacy(legacy, kind)
+        screen.blit(pygame.transform.scale(legacy, screen.get_size()), (0, 0))
+
+    def _background_legacy(self, screen, kind):
         if kind == "lake_establishing":
             kind = "lake"
 
@@ -90,7 +95,9 @@ class PrototypeRenderer:
 
 
     def scene11_stella_to_sky(self, screen, gaze_progress=0.0, speaking=False, speaking_time=0.0):
-        """Scene 11 POV: Stella fills Marco's view, then slides below frame as he looks up."""
+        """Scene 11 POV, authored in legacy prototype coordinates and scaled to 640x360."""
+        target = screen
+        screen = pygame.Surface((1000, 600))
         width, height = screen.get_size()
         p = max(0.0, min(1.0, float(gaze_progress)))
 
@@ -119,6 +126,8 @@ class PrototypeRenderer:
             pygame.draw.ellipse(screen, (105, 55, 58), (489, head_y + 13, 22, mouth_open))
         elif head_y < height + 60:
             pygame.draw.line(screen, (105, 55, 58), (490, head_y + 15), (510, head_y + 15), 2)
+
+        target.blit(pygame.transform.scale(screen, target.get_size()), (0, 0))
 
     def _stella(self, screen):
         pygame.draw.circle(screen, (210, 170, 155), (500, 300), 45)

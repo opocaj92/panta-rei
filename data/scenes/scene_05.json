@@ -16,7 +16,7 @@
   ],
   "tracing": {
     "trace_lifetime": 2.8,
-    "trace_width": 3,
+    "trace_width": 6,
     "min_point_distance": 5.0
   },
   "post_dialogue_delay": 1.5,

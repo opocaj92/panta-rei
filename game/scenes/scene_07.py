@@ -9,7 +9,7 @@ class Scene07(Scene):
 
     def __init__(self, game, config):
         super().__init__(game, config)
-        self.renderer = StellaPOVRenderer()
+        self.renderer = StellaPOVRenderer(config, game.assets)
         self.camera_y = 0.0
         self.start_y = 0.0
         self.target_y = 0.0
@@ -18,15 +18,17 @@ class Scene07(Scene):
         self.pan_started = False
         self.pan_complete = False
         self.dialogue_started = False
-        self.transition_started = False
         self.elapsed = 0.0
+
+    def allows_dialogue_advance(self):
+        return self.dialogue_started and not self.transition_started
 
     def help_needed(self):
         return not self.pan_started
 
     def enter(self):
         camera = self.config.get("camera", {})
-        self.start_y = float(camera.get("phone_y", 600.0))
+        self.start_y = float(camera.get("phone_y", 360.0))
         self.target_y = float(camera.get("marco_y", 0.0))
         self.pan_duration = max(0.001, float(camera.get("pan_duration", 1.25)))
         self.camera_y = self.start_y
@@ -63,15 +65,10 @@ class Scene07(Scene):
         self.game.dialogue.update(dt)
 
         if self.game.dialogue.finished and not self.transition_started:
-            self.transition_started = True
-            self.game.scenes.change_scene(
-                self.config.get("next_scene", "scene_08"),
-                transition_config=self.config.get("transition_out"),
-                state={"camera_y": self.camera_y},
-            )
+            self.request_transition(self.config.get("next_scene", "scene_08"), state={"camera_y": self.camera_y})
 
     def render(self, screen):
-        self.renderer.render(screen, self.camera_y, self.elapsed)
+        self.renderer.render(screen, self.camera_y, self.elapsed, animate_phone=not self.pan_complete)
 
         if self.dialogue_started:
             self.game.text_renderer.dialogue(screen, self.game.dialogue)

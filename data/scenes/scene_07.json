@@ -2,7 +2,7 @@
   "id": "scene_07",
   "type": "stella_phone_pov",
   "camera": {
-    "phone_y": 600,
+    "phone_y": 360,
     "marco_y": 0,
     "pan_duration": 1.25
   },
@@ -18,5 +18,18 @@
   "help": {
     "it": "Premi W o freccia su per alzare lo sguardo.",
     "en": "Press W or the up arrow to look up."
+  },
+  "presentation": {
+    "marco": {
+      "height": 245,
+      "left": 132,
+      "bottom": 445
+    },
+    "phone_glass_rect": [
+      265,
+      92,
+      110,
+      170
+    ]
   }
 }

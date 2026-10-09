@@ -51,6 +51,9 @@ class SceneManager:
             config = json.load(f)
 
         validate_scene_config(name, config)
+        destination = config.get("next_scene")
+        if destination is not None and destination not in SCENES:
+            raise ValueError(f"{name}.next_scene is not registered: {destination!r}")
         return config
 
     def change_scene(self, name, transition_config=None, state=None):
@@ -86,13 +89,14 @@ class SceneManager:
         self._activate_scene(name, state=state)
 
     def _activate_scene(self, name, start_transition_in=True, state=None):
+        # Validate and construct the destination before exiting the current scene.
+        config = self._load_config(name)
+        next_scene = SCENES[name](self.game, config)
+        next_scene.incoming_state = state if state is not None else {}
         if self.current:
             self.current.exit()
-
-        config = self._load_config(name)
         self.current_name = name
-        self.current = SCENES[name](self.game, config)
-        self.current.incoming_state = state or {}
+        self.current = next_scene
         self.current.enter()
         if start_transition_in:
             self._start_transition_in(config.get("transition_in"))
@@ -110,27 +114,20 @@ class SceneManager:
         elif transition_type == "none":
             self.game.transitions.clear()
 
-    def finish_pending_transition(self):
+    def _finish_pending(self, *, start_transition_in):
         if self.pending_scene is None:
             return
-
-        scene_name = self.pending_scene
-        state = self.pending_state
+        name, state = self.pending_scene, self.pending_state
         self.pending_scene = None
         self.pending_state = None
-        self._activate_scene(scene_name, state=state)
+        self._activate_scene(name, start_transition_in=start_transition_in, state=state)
 
+    def finish_pending_transition(self):
+        self._finish_pending(start_transition_in=True)
 
     def finish_pending_blink(self):
-        if self.pending_scene is None:
-            return
-
-        scene_name = self.pending_scene
-        state = self.pending_state
-        self.pending_scene = None
-        self.pending_state = None
-        # Keep the blink transition alive while swapping scenes at full black.
-        self._activate_scene(scene_name, start_transition_in=False, state=state)
+        # Keep the blink overlay alive during the scene swap at full black.
+        self._finish_pending(start_transition_in=False)
 
     def handle_input(self, event):
         if self.current:

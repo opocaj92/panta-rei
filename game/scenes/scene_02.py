@@ -1,7 +1,7 @@
 import pygame
 
 from game.core.scene import Scene
-from game.rendering.renderer import PrototypeRenderer
+from game.rendering.scene02_renderer import Scene02Renderer
 from game.systems.gaze import GazeSystem
 
 
@@ -16,19 +16,19 @@ class Scene02(Scene):
 
     def __init__(self, game, config):
         super().__init__(game, config)
-        self.renderer = PrototypeRenderer()
+        self.renderer = Scene02Renderer(game.assets, config)
 
-        self.views = list(config.get("views", []))
+        self.horizontal_views = list(config.get("horizontal_views", []))
         self.sky_view = config.get("sky_view")
         self.current_view = config.get("initial_view")
 
-        if not self.views:
-            raise ValueError("scene_02 requires a non-empty 'views' list")
-        if self.current_view not in self.views:
-            raise ValueError("scene_02 'initial_view' must be one of 'views'")
+        if not self.horizontal_views:
+            raise ValueError("scene_02 requires a non-empty 'horizontal_views' list")
+        if self.current_view not in self.horizontal_views:
+            raise ValueError("scene_02 'initial_view' must be one of 'horizontal_views'")
 
         self.gaze = GazeSystem(
-            self.views,
+            self.horizontal_views,
             sky_view=self.sky_view,
             initial_view=self.current_view,
         )
@@ -48,12 +48,21 @@ class Scene02(Scene):
         self.progress_complete = False
         self.dialogue_delay = 0.0
         self.dialogue_started = False
-        self.transition_started = False
+
+    def allows_dialogue_advance(self):
+        return self.progress_complete and self.dialogue_started and not self.transition_started
 
     def help_needed(self):
-        return not self.progress_complete
+        # Observation is active progress: suppress hints for the entire hold,
+        # including the frame before the attention counter is updated.
+        if self.progress_complete:
+            return False
+        if not self.stella_seen:
+            return self.current_view != self.stella_view
+        return self.current_view != self.river_view
 
     def enter(self):
+        self.renderer.reset()
         self.game.dialogue.load("scene_02")
 
     def handle_input(self, event):
@@ -62,9 +71,16 @@ class Scene02(Scene):
 
         requested_view = self.gaze.handle_key(event.key)
         if requested_view is not None:
+            # View navigation is active exploration, not inactivity. Reset the
+            # contextual-help clock and dismiss any currently visible hint.
+            self.mark_help_progress()
             self.current_view = requested_view
 
     def update(self, dt):
+        # The renderer receives the current presentation view so random visual
+        # events can start only when they are actually observable.
+        self.renderer.update(dt, self.current_view)
+
         if not self.progress_complete:
             if self.current_view == self.stella_view:
                 if not self.stella_seen:
@@ -72,6 +88,7 @@ class Scene02(Scene):
                     self.mark_help_progress()
                     if self.stella_attention >= self.stella_required:
                         self.stella_seen = True
+                        self.mark_help_progress()  # fresh countdown to find the river
 
             elif self.current_view == self.river_view and self.stella_seen:
                 self.river_attention += dt
@@ -91,14 +108,10 @@ class Scene02(Scene):
         self.game.dialogue.update(dt)
 
         if self.game.dialogue.finished and not self.transition_started:
-            self.transition_started = True
-            self.game.scenes.change_scene(
-                "scene_03",
-                transition_config=self.config.get("transition_out"),
-            )
+            self.request_transition("scene_03")
 
     def render(self, screen):
-        self.renderer.background(screen, self.current_view)
+        self.renderer.render(screen, self.current_view)
 
         if self.progress_complete and self.dialogue_started:
             self.game.text_renderer.dialogue(screen, self.game.dialogue)

@@ -1,7 +1,7 @@
 {
   "id": "scene_11",
   "type": "stella_to_sky",
-  "gaze_move_duration": 1.15,
+  "gaze_move_duration": 3.0,
   "sky_hold_duration": 4.5,
   "black_hold_duration": 1.0,
   "next_scene": "scene_12",
