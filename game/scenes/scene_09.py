@@ -1,11 +1,12 @@
 import pygame
 
 from game.core.scene import Scene
-from game.rendering.love_silhouette_renderer import LoveSilhouetteRenderer
+from game.rendering.silhouette_renderer import SilhouetteRenderer
+from game.systems.silhouette_drag import SilhouetteDragSystem
 
 
 class Scene09(Scene):
-    """Two profiles approach until their lips touch, pause, then retreat."""
+    """Two silhouettes approach, meet briefly, then move apart."""
 
     APPROACHING = "approaching"
     JOINED = "joined"
@@ -14,18 +15,16 @@ class Scene09(Scene):
 
     def __init__(self, game, config):
         super().__init__(game, config)
-        self.renderer = LoveSilhouetteRenderer(self.game.assets)
+        self.renderer = SilhouetteRenderer(self.game.assets)
         self.elapsed = 0.0
         self.phase = self.APPROACHING
         self.separation = 0.0
         self.joined_elapsed = 0.0
-        self.dragging = False
-        self.last_mouse_x = 0
-        self.drag_side = None
+        self.silhouette_drag = SilhouetteDragSystem()
         self.interaction_finished = False
-        self.kiss_flash_elapsed = None
-        self.kiss_flash_outline = None
-        self.kiss_flash_size = None
+        self.meeting_flash_elapsed = None
+        self.meeting_flash_outline = None
+        self.meeting_flash_size = None
 
     def help_needed(self):
         return self.phase in (self.APPROACHING, self.SEPARATING)
@@ -37,10 +36,10 @@ class Scene09(Scene):
     def enter(self):
         self.game.dialogue.load("scene_09")
         self.separation = float(self.interaction_cfg.get("start_separation", 118.0))
-        self.kiss_flash_elapsed = None
-        self.kiss_flash_outline = None
-        self.kiss_flash_size = None
-        self.mark_help_progress()
+        self.meeting_flash_elapsed = None
+        self.meeting_flash_outline = None
+        self.meeting_flash_size = None
+        self.silhouette_drag.stop()
 
     def handle_input(self, event):
         if self.phase == self.JOINED or self.phase == self.COMPLETE:
@@ -49,26 +48,16 @@ class Scene09(Scene):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             side = self._silhouette_side_at(event.pos)
             if side is not None:
-                self.dragging = True
-                self.mark_help_progress()
-                self.drag_side = side
-                self.last_mouse_x = event.pos[0]
+                self.silhouette_drag.start(side, event.pos[0])
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-            if self.dragging:
-                self.mark_help_progress()
-            self.dragging = False
-            self.drag_side = None
-        elif event.type == pygame.MOUSEMOTION and self.dragging:
-            dx = event.pos[0] - self.last_mouse_x
-            self.last_mouse_x = event.pos[0]
-            sensitivity = float(self.interaction_cfg.get("drag_sensitivity", 1.0))
-
-            # Dragging either figure changes only its distance from the centre;
-            # the counterpart is rendered at the mirrored distance automatically.
-            radial_delta = (-dx if self.drag_side == "left" else dx) * sensitivity
-            previous_separation = self.separation
+            self.silhouette_drag.stop()
+        elif event.type == pygame.MOUSEMOTION and self.silhouette_drag.dragging:
+            radial_delta = self.silhouette_drag.delta(
+                event, self.interaction_cfg.get("drag_sensitivity", 1.0),
+                approaching=self.phase == self.APPROACHING,
+            )
             # Directional clamp: during approach only inward motion counts;
-            # after the kiss only outward motion counts. Neither can cross.
+            # after the meeting only outward motion counts. Neither can cross.
             if self.phase == self.APPROACHING:
                 radial_delta = min(0.0, radial_delta)
             elif self.phase == self.SEPARATING:
@@ -77,37 +66,35 @@ class Scene09(Scene):
 
             if self.phase == self.APPROACHING:
                 self.separation = max(0.0, min(self.separation, float(self.interaction_cfg.get("start_separation", 118.0))))
-                if self.separation < previous_separation:
-                    self.mark_help_progress()
+
                 if self.separation <= float(self.interaction_cfg.get("join_threshold", 3.0)):
                     self.separation = 0.0
                     self.phase = self.JOINED
                     self.joined_elapsed = 0.0
                     # Flash is triggered halfway through the joined pause.
-                    self.kiss_flash_elapsed = None
-                    self.kiss_flash_outline = None
-                    self.dragging = False
+                    self.meeting_flash_elapsed = None
+                    self.meeting_flash_outline = None
+                    self.silhouette_drag.stop()
             elif self.phase == self.SEPARATING:
                 target = float(self.interaction_cfg.get("final_separation", 118.0))
                 self.separation = max(0.0, min(self.separation, target))
-                if self.separation > previous_separation:
-                    self.mark_help_progress()
+
                 if self.separation >= target:
                     self.separation = target
                     self.phase = self.COMPLETE
                     self.interaction_finished = True
-                    self.dragging = False
+                    self.silhouette_drag.stop()
 
     def _silhouette_side_at(self, pos):
         return self.renderer.side_at(self.game.screen, pos, self.separation)
 
     def update(self, dt):
         self.elapsed += dt
-        if self.kiss_flash_elapsed is not None:
-            self.kiss_flash_elapsed += dt
-            if self.kiss_flash_elapsed >= 0.55:
-                self.kiss_flash_elapsed = None
-                self.kiss_flash_outline = None
+        if self.meeting_flash_elapsed is not None:
+            self.meeting_flash_elapsed += dt
+            if self.meeting_flash_elapsed >= 0.55:
+                self.meeting_flash_elapsed = None
+                self.meeting_flash_outline = None
         self.game.dialogue.update(dt)
 
         if self.phase == self.JOINED:
@@ -119,21 +106,21 @@ class Scene09(Scene):
             midpoint = joined_duration / 2.0
             if previous_joined_elapsed < midpoint <= self.joined_elapsed:
                 # Start precisely when the joined pause crosses its midpoint.
-                self.kiss_flash_elapsed = self.joined_elapsed - midpoint
-                self.kiss_flash_outline = None
+                self.meeting_flash_elapsed = self.joined_elapsed - midpoint
+                self.meeting_flash_outline = None
             if self.joined_elapsed >= joined_duration:
                 self.phase = self.SEPARATING
-                self.mark_help_progress()
+
 
         if self.game.dialogue.finished and self.interaction_finished and not self.transition_started:
             self.request_transition(self.config.get("next_scene", "scene_10"))
 
-    def _draw_kiss_flash(self, screen):
+    def _draw_meeting_flash(self, screen):
         """A brief pixel-sharp halo around the *combined* joined silhouettes."""
-        if self.kiss_flash_elapsed is None:
+        if self.meeting_flash_elapsed is None:
             return
         size = screen.get_size()
-        if self.kiss_flash_outline is None or self.kiss_flash_size != size:
+        if self.meeting_flash_outline is None or self.meeting_flash_size != size:
             # Compose the two opaque shapes into one mask, so the glow follows
             # their shared exterior instead of drawing two overlapping halos.
             boy_rect, girl_rect = self.renderer.rects(screen, 0.0)
@@ -152,22 +139,22 @@ class Scene09(Scene):
                 return
             outline = pygame.Surface(shape.get_size(), pygame.SRCALPHA)
             # Both passes use hard pixel edges; the low-alpha wider line is
-            # the halo, while the narrower stroke gives the kiss its sparkle.
+            # the halo, while the narrower stroke gives the meeting its sparkle.
             pygame.draw.lines(outline, (235, 240, 255, 65), True, points, 5)
             pygame.draw.lines(outline, (255, 250, 238, 220), True, points, 2)
-            self.kiss_flash_outline = (outline, (left, top))
-            self.kiss_flash_size = size
+            self.meeting_flash_outline = (outline, (left, top))
+            self.meeting_flash_size = size
 
-        t = self.kiss_flash_elapsed
+        t = self.meeting_flash_elapsed
         # Rise to full intensity in 0.15s, then fade over the next 0.40s.
         strength = min(1.0, t / 0.15) if t < 0.15 else max(0.0, (0.55 - t) / 0.40)
-        outline, pos = self.kiss_flash_outline
+        outline, pos = self.meeting_flash_outline
         outline.set_alpha(round(255 * strength))
         screen.blit(outline, pos)
 
     def render(self, screen):
         self.renderer.render(screen, self.separation, self.phase, self.elapsed)
-        self._draw_kiss_flash(screen)
+        self._draw_meeting_flash(screen)
         line = self.game.dialogue.current_line
         if line and line.get("type") == "thought":
             self.game.text_renderer.thought(screen, self.game.dialogue)

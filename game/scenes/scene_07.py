@@ -40,7 +40,7 @@ class Scene07(Scene):
 
         if event.key in (pygame.K_UP, pygame.K_w):
             self.pan_started = True
-            self.mark_help_progress()
+
             self.pan_elapsed = 0.0
 
     def update(self, dt):

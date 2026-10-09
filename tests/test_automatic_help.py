@@ -38,10 +38,8 @@ def test_help_appears_after_eight_seconds():
 def test_progress_does_not_restart_countdown_or_dismiss_visible_help():
     scene = make_scene()
     scene.update_help(5.0)
-    scene.mark_help_progress()
     scene.update_help(3.0)
     assert scene.help_visible
-    scene.mark_help_progress()
     scene.update_help(100.0)
     assert scene.help_visible
     scene.render_help(None)
@@ -54,10 +52,10 @@ def test_help_disappears_only_when_no_longer_needed():
     scene.waiting = False
     scene.update_help(0.1)
     assert not scene.help_visible
-    assert scene.help_inactivity == 0.0
+    assert scene.help_wait_elapsed == 0.0
 
 
 def test_negative_delta_does_not_advance_help():
     scene = make_scene()
     scene.update_help(-5.0)
-    assert scene.help_inactivity == 0.0
+    assert scene.help_wait_elapsed == 0.0

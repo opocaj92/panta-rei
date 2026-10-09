@@ -8,7 +8,7 @@ pytest.importorskip("pygame")
 
 from game.core.asset_manager import AssetManager
 from game.core.scene_manager import SceneManager
-from game.rendering.animation_renderer import LoopingAnimation
+from game.systems.animation import LoopingAnimation
 from game.scenes.scene_03 import Scene03
 from game.scenes.scene_06 import Scene06
 

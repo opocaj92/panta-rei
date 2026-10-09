@@ -55,12 +55,8 @@ class Scene04(Scene):
 
         # Reaching the estuary does NOT lock navigation. The player may keep
         # moving while the remaining dialogue unfolds.
-        previous_camera = self.camera.copy()
         self._update_camera(dt)
-        # Moving the camera counts as activity, even if the player has not
-        # yet moved closer to the estuary. Only show help after inactivity.
-        if self.camera.distance_squared_to(previous_camera) > 0.0001:
-            self.mark_help_progress()
+
         self._check_estuary_visibility()
 
         self.game.dialogue.update(dt)
@@ -118,7 +114,7 @@ class Scene04(Scene):
         ):
             self.best_estuary_distance = min(self.best_estuary_distance, distance)
             self.best_visible_fraction = max(self.best_visible_fraction, visible_fraction)
-            self.mark_help_progress()
+
 
         self.estuary_visible = visible_fraction >= self.required_visible_fraction
 

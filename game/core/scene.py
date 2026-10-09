@@ -4,8 +4,7 @@ class Scene:
     Subclasses keep ownership of narrative state and mechanics. This base class
     intentionally provides only lifecycle hooks plus the cross-scene help timer.
     Interactive scenes opt into automatic help by overriding ``help_needed`` and
-    may call ``mark_help_progress`` for backwards compatibility; progress no longer
-    resets the hint once its countdown has started.
+    receive hints after the configured idle period.
     """
 
     HELP_DELAY = 8.0
@@ -14,16 +13,16 @@ class Scene:
         self.game = game
         self.config = config
         self.help_visible = False
-        self.help_inactivity = 0.0
+        self.help_wait_elapsed = 0.0
         self.incoming_state = {}
         self.transition_started = False
 
-    def request_transition(self, destination, *, state=None):
+    def request_transition(self, destination, *, state=None, already_faded=False):
         """Request the configured exit transition at most once per scene."""
         if self.transition_started:
             return False
         self.transition_started = True
-        kwargs = {"transition_config": self.config.get("transition_out")}
+        kwargs = {"transition_config": None if already_faded else self.config.get("transition_out")}
         if state is not None:
             kwargs["state"] = state
         try:
@@ -59,21 +58,17 @@ class Scene:
         """Return True only while player action is required to advance the scene."""
         return False
 
-    def mark_help_progress(self):
-        """Compatibility hook: progress no longer dismisses or delays help."""
-        pass
-
     def update_help(self, dt):
         # The scene's completion criterion alone controls disappearance.
         if not self.get_help_text() or not self.help_needed():
-            self.help_inactivity = 0.0
+            self.help_wait_elapsed = 0.0
             self.help_visible = False
             return
 
         if not self.help_visible:
-            self.help_inactivity += max(0.0, dt)
+            self.help_wait_elapsed += max(0.0, dt)
             delay = float(self.config.get("help_delay", self.HELP_DELAY))
-            if self.help_inactivity >= delay:
+            if self.help_wait_elapsed >= delay:
                 self.help_visible = True
 
     def get_help_text(self):

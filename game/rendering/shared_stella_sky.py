@@ -1,18 +1,11 @@
+"""Reusable sky, Stella, and meteor presentation for Marco POV and panorama."""
 import random
-
 import pygame
-
-from game.rendering.animation_renderer import LoopingAnimation
-from game.rendering.renderer import PrototypeRenderer
+from game.systems.animation import LoopingAnimation
 
 
-class Scene02Renderer:
-    """Render Marco's gaze views while keeping animation presentation-only.
-
-    River, grass/wood, city, and sky use layered Scene 02 artwork. The shooting
-    star is a presentation-only random event owned by this renderer.
-    """
-
+class SharedStellaSky:
+    """Own only the assets and animation state used by both POV compositions."""
     FRAME_COUNT = 4
     RIVER_FPS = 1.25
     GRASS_FPS = 1.50
@@ -38,7 +31,6 @@ class Scene02Renderer:
     SHOOTING_STAR_SPAWN_Y = (0, 8)
 
     def __init__(self, assets, config=None, rng=None):
-        self.prototype = PrototypeRenderer()
         self.rng = rng or random.Random()
         presentation = (config or {}).get("presentation", {})
         stella_placement = presentation.get("stella_placement", {})
@@ -72,36 +64,6 @@ class Scene02Renderer:
         )
         self.stella_turn_max_delay = float(
             stella_turn.get("max_delay", self.STELLA_TURN_MAX_DELAY)
-        )
-
-        self.river_background = self._require(
-            assets, "scene02.river.background", "scene_02/river_background.png"
-        )
-        self.river_frames = self._load_frames(
-            assets,
-            "scene02.river.bank",
-            "scene_02/river_bank_{:02d}.png",
-            self.FRAME_COUNT,
-        )
-
-        self.grass_background = self._require(
-            assets, "scene02.grass.background", "scene_02/grass_background.png"
-        )
-        self.grass_frames = self._load_frames(
-            assets,
-            "scene02.grass.foreground",
-            "scene_02/grass_foreground_{:02d}.png",
-            self.FRAME_COUNT,
-        )
-
-        self.city_background = self._require(
-            assets, "scene02.city.background", "scene_02/city_background.png"
-        )
-        self.city_frames = self._load_frames(
-            assets,
-            "scene02.city.foreground",
-            "scene_02/city_foreground_{:02d}.png",
-            self.FRAME_COUNT,
         )
 
         self.sky_background = self._require(
@@ -142,17 +104,10 @@ class Scene02Renderer:
             self.STELLA_TURN_FRAME_COUNT,
         )
 
-        self.river_animation = LoopingAnimation(self.river_frames, self.RIVER_FPS)
-        self.grass_animation = LoopingAnimation(self.grass_frames, self.GRASS_FPS)
-        self.city_animation = LoopingAnimation(self.city_frames, self.CITY_FPS)
         self.sky_animation = LoopingAnimation(self.sky_frames, self.SKY_FPS)
         self.stella_foreground_animation = LoopingAnimation(
-            self.stella_foreground_frames, self.STELLA_FOREGROUND_FPS
-        )
-        self.stella_idle_animation = LoopingAnimation(
-            self.stella_idle_frames, self.STELLA_IDLE_FPS
-        )
-        self.reset()
+            self.stella_foreground_frames, self.STELLA_FOREGROUND_FPS)
+        self.stella_idle_animation = LoopingAnimation(self.stella_idle_frames, self.STELLA_IDLE_FPS)
 
     @staticmethod
     def _require(assets, key, path):
@@ -219,10 +174,7 @@ class Scene02Renderer:
                 self.stella_turn_delay = self._next_stella_turn_delay()
                 break
 
-    def reset(self):
-        self.river_animation.reset()
-        self.grass_animation.reset()
-        self.city_animation.reset()
+    def reset_shared(self):
         self.sky_animation.reset()
         self.stella_foreground_animation.reset()
         self.stella_idle_animation.reset()
@@ -230,7 +182,6 @@ class Scene02Renderer:
         self.stella_turn_frame = 0
         self.stella_turn_time = 0.0
         self.stella_turn_delay = self._next_stella_turn_delay()
-
         self.shooting_star_active = False
         self.shooting_star_time = 0.0
         self.shooting_star_frame = 0
@@ -270,80 +221,9 @@ class Scene02Renderer:
                 self.shooting_star_time = 0.0
                 self.shooting_star_delay = self._next_shooting_star_delay()
 
-    def update(self, dt, current_view=None):
-        # Environmental loops keep running even while Marco looks elsewhere.
-        # Returning to a view therefore does not restart its animation.
-        self.river_animation.update(dt)
-        self.grass_animation.update(dt)
-        self.city_animation.update(dt)
+    def update_shared(self, dt, *, stella_visible=False, sky_visible=False):
         self.sky_animation.update(dt)
         self.stella_foreground_animation.update(dt)
         self.stella_idle_animation.update(dt)
-        self._update_stella_turn(dt, current_view == "stella")
-
-        self._update_shooting_star(dt, current_view == "sky")
-
-    def render(self, screen, view):
-        if view == "river":
-            screen.blit(self.river_background, (0, 0))
-            screen.blit(self.river_animation.current_frame, (0, 0))
-            return
-
-        if view == "grass":
-            screen.blit(self.grass_background, (0, 0))
-            screen.blit(self.grass_animation.current_frame, (0, 0))
-            return
-
-        if view == "city":
-            screen.blit(self.city_background, (0, 0))
-            screen.blit(self.city_animation.current_frame, (0, 0))
-            return
-
-        if view == "stella":
-            # Required compositing order:
-            # background -> environmental foreground -> Stella.
-            screen.blit(self.stella_background, (0, 0))
-            screen.blit(self.stella_foreground_animation.current_frame, (0, 0))
-            if self.stella_turn_active:
-                character_frame = self.stella_turn_frames[self.stella_turn_frame]
-            else:
-                character_frame = self.stella_idle_animation.current_frame
-
-            # Scale the complete transparent Stella layer, preserving the same
-            # ground-contact anchor for both idle and turning animations.
-            scale = self.stella_character_scale
-            width, height = character_frame.get_size()
-            character_frame = pygame.transform.smoothscale(
-                character_frame,
-                (round(width * scale), round(height * scale)),
-            )
-            anchor_x, anchor_y = 450, 300
-            offset_x, offset_y = self.stella_character_offset
-            screen.blit(
-                character_frame,
-                (
-                    round(anchor_x * (1 - scale)) + offset_x,
-                    round(anchor_y * (1 - scale)) + offset_y,
-                ),
-            )
-            return
-
-        if view == "sky":
-            # Required compositing order:
-            # background -> star/moon foreground -> shooting star.
-            screen.blit(self.sky_background, (0, 0))
-            screen.blit(self.sky_animation.current_frame, (0, 0))
-
-            if self.shooting_star_active:
-                # The current shooting-star PNGs are cropped 54x40 frames,
-                # not the older 320x247 animation canvas. Keep a fixed origin
-                # for the full sequence so the authored motion stays intact.
-                # The spawn point represents the visible meteor near its head.
-                screen.blit(
-                    self.shooting_star_frames[self.shooting_star_frame],
-                    (self.shooting_star_pos[0] - 40,
-                     self.shooting_star_pos[1] - 25),
-                )
-            return
-
-        self.prototype.background(screen, view)
+        self._update_stella_turn(dt, stella_visible)
+        self._update_shooting_star(dt, sky_visible)

@@ -56,22 +56,18 @@ class Scene05(Scene):
     def handle_input(self, event):
         if not self.transition_started:
             self.hand.handle_event(event)
-            # A press begins a genuine drawing attempt; hide the hint now,
-            # rather than waiting for the first rendered line segment.
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                self.mark_help_progress()
-            # Require a genuine visible stroke, not a click or mouse movement.
+
             # Points may fade, so remember successful tracing for the whole scene.
             if not self.has_traced_line and self.hand.has_visible_stroke():
                 self.has_traced_line = True
-                self.mark_help_progress()
+
 
     def update(self, dt):
         self.flow_time += dt
         self.hand.update(dt)
         if not self.has_traced_line and self.hand.has_visible_stroke():
             self.has_traced_line = True
-            self.mark_help_progress()
+
         self.game.dialogue.update(dt)
 
         if self.game.dialogue.finished and not self.transition_started:

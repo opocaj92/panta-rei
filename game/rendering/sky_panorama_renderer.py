@@ -1,33 +1,22 @@
-"""Scene 11: continuous vertical panorama with Scene 02 animation layers."""
-import json
+"""Scene 11 panorama, reusing Marco POV animation layers."""
 import random
 import pygame
-from game.core.config import DATA_DIR
-from game.rendering.scene02_renderer import Scene02Renderer
+from game.rendering.shared_stella_sky import SharedStellaSky
 
 
-class Scene11Renderer(Scene02Renderer):
+class SkyPanoramaRenderer(SharedStellaSky):
     def __init__(self, assets, config):
-        # Scene 02 is the single source of truth for Stella's placement.
-        # Keep Scene 11's other presentation settings independent.
-        scene02_path = DATA_DIR / "scenes" / "scene_02.json"
-        with scene02_path.open("r", encoding="utf-8") as source:
-            scene02_config = json.load(source)
-        placement = scene02_config.get("presentation", {}).get("stella_placement", {})
-        merged_config = dict(config)
-        presentation = dict(config.get("presentation", {}))
-        presentation["stella_placement"] = placement
-        merged_config["presentation"] = presentation
-        super().__init__(assets, merged_config)
+        super().__init__(assets, config)
         self.world_background = self._require(assets, "scene11.background", "scene_11/background.png")
         if self.world_background.get_size() != (640, 720):
             raise ValueError("Scene 11 panorama must be 640x720")
         self.facing_frames = self.stella_turn_frames[2:6]  # authored 03..06, inclusive
         self.elapsed = 0.0
         self.meteors_enabled = False
+        self.reset()
 
     def reset(self):
-        super().reset()
+        self.reset_shared()
         self.elapsed = 0.0
         self.meteors_enabled = False
 

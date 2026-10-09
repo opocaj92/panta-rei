@@ -2,7 +2,7 @@ import math
 import pygame
 
 from game.core.scene import Scene
-from game.rendering.scene11_renderer import Scene11Renderer
+from game.rendering.sky_panorama_renderer import SkyPanoramaRenderer
 
 
 class Scene11(Scene):
@@ -10,7 +10,7 @@ class Scene11(Scene):
 
     def __init__(self, game, config):
         super().__init__(game, config)
-        self.renderer = Scene11Renderer(game.assets, config)
+        self.renderer = SkyPanoramaRenderer(game.assets, config)
         self.phase = "dialogue"
         self.gaze_progress = 0.0
         self.phase_timer = 0.0
@@ -43,7 +43,7 @@ class Scene11(Scene):
         if event.key in (pygame.K_UP, pygame.K_w):
             self.look_interaction_started = True
             self.phase = "looking_up"
-            self.mark_help_progress()
+
             self.phase_timer = 0.0
 
     def update(self, dt):
@@ -84,7 +84,7 @@ class Scene11(Scene):
         if self.phase == "black_hold":
             self.phase_timer += dt
             if self.phase_timer >= float(self.config.get("black_hold_duration", 1.0)):
-                self.game.scenes.change_scene(self.config.get("next_scene", "scene_12"))
+                self.request_transition(self.config.get("next_scene", "scene_12"), already_faded=True)
                 self.phase = "done"
 
     def _begin_black_hold(self):

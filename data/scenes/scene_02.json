@@ -47,13 +47,7 @@
           32
         ]
       }
-    },
-    "stella_placement": {
-      "scale": 0.58,
-      "offset": [
-        -61,
-        4
-      ]
     }
-  }
+  },
+  "shared_presentation": "stella_riverbank"
 }

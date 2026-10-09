@@ -15,21 +15,9 @@
     "type": "eye_blink",
     "duration": 1.2
   },
-  "presentation": {
-    "marco": {
-      "height": 245,
-      "left": 62,
-      "bottom": 485
-    },
-    "phone_glass_rect": [
-      265,
-      92,
-      110,
-      170
-    ]
-  },
   "help": {
     "it": "Trascina verso l’alto per avvicinarti a Marco.",
     "en": "Drag upward to move closer to Marco."
-  }
+  },
+  "shared_presentation": "stella_pov"
 }

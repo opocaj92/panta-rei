@@ -1,0 +1,32 @@
+{
+  "dialogue": {
+    "size": 17
+  },
+  "speaker": {
+    "size": 21
+  },
+  "thought": {
+    "size": 15,
+    "italic": true
+  },
+  "help": {
+    "size": 14
+  },
+  "credits_role": {
+    "size": 9
+  },
+  "credits_name": {
+    "size": 12
+  },
+  "credits_other": {
+    "size": 10,
+    "italic": true
+  },
+  "credits_title": {
+    "size": 18
+  },
+  "credits_subtitle": {
+    "size": 10,
+    "italic": true
+  }
+}

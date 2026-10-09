@@ -19,17 +19,5 @@
     "it": "Premi W o freccia su per alzare lo sguardo.",
     "en": "Press W or the up arrow to look up."
   },
-  "presentation": {
-    "marco": {
-      "height": 245,
-      "left": 62,
-      "bottom": 485
-    },
-    "phone_glass_rect": [
-      265,
-      92,
-      110,
-      170
-    ]
-  }
+  "shared_presentation": "stella_pov"
 }

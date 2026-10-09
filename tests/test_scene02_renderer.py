@@ -2,7 +2,7 @@ import importlib.util
 import random
 import unittest
 
-from game.rendering.animation_renderer import LoopingAnimation
+from game.systems.animation import LoopingAnimation
 
 
 class LoopingAnimationTests(unittest.TestCase):
@@ -24,8 +24,8 @@ class LoopingAnimationTests(unittest.TestCase):
 @unittest.skipUnless(importlib.util.find_spec("pygame"), "pygame is not installed")
 class Scene02ShootingStarTests(unittest.TestCase):
     def setUp(self):
-        from game.rendering.scene02_renderer import Scene02Renderer
-        self.renderer_class = Scene02Renderer
+        from game.rendering.marco_pov_renderer import MarcoPOVRenderer
+        self.renderer_class = MarcoPOVRenderer
 
     def make_renderer(self):
         class FakeAssets:

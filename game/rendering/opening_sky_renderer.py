@@ -1,7 +1,8 @@
 import pygame
+from game.systems.animation import LoopingAnimation
 
 
-class Scene01Renderer:
+class OpeningSkyRenderer:
     """Compose Scene 01 from complete replacement animation frames.
 
     Animation state is presentation-only. Water, foreground, and Marco each use
@@ -68,14 +69,11 @@ class Scene01Renderer:
             assets, "scene01.title", "scene_01/title.png"
         )
 
-        self.water_time = 0.0
-        self.water_frame = 0
-        self.foreground_time = 0.0
-        self.foreground_frame = 0
-        self.marco_time = 0.0
-        self.marco_frame = 0
-        self.stella_time = 0.37
-        self.stella_frame = 1
+        self.water_animation = LoopingAnimation(self.water_frames, self.WATER_FPS)
+        self.foreground_animation = LoopingAnimation(self.foreground_frames, self.FOREGROUND_FPS)
+        self.marco_animation = LoopingAnimation(self.marco_frames, self.MARCO_FPS)
+        self.stella_animation = LoopingAnimation(self.stella_frames, self.STELLA_FPS)
+        self.reset()
 
     @staticmethod
     def _require(assets, key, path, alpha=True):
@@ -85,62 +83,24 @@ class Scene01Renderer:
         return image
 
     def reset(self):
-        """Restart all looping presentation animation when Scene 01 is entered."""
-        self.water_time = 0.0
-        self.water_frame = 0
-        self.foreground_time = 0.0
-        self.foreground_frame = 0
-        self.marco_time = 0.0
-        self.marco_frame = 0
-        self.stella_time = 0.37
-        self.stella_frame = 1
-
-    @staticmethod
-    def _advance_loop(elapsed, frame, dt, fps, frame_count):
-        elapsed += dt
-        frame_duration = 1.0 / fps
-        while elapsed >= frame_duration:
-            elapsed -= frame_duration
-            frame = (frame + 1) % frame_count
-        return elapsed, frame
+        """Restart all loops, preserving Stella's authored initial phase."""
+        for animation in (self.water_animation, self.foreground_animation,
+                          self.marco_animation, self.stella_animation):
+            animation.reset()
+        self.stella_animation.elapsed = 0.37
+        self.stella_animation.frame_index = 1
 
     def update(self, dt):
-        """Advance the independent environmental and character idle loops."""
-        self.water_time, self.water_frame = self._advance_loop(
-            self.water_time,
-            self.water_frame,
-            dt,
-            self.WATER_FPS,
-            len(self.water_frames),
-        )
-        self.foreground_time, self.foreground_frame = self._advance_loop(
-            self.foreground_time,
-            self.foreground_frame,
-            dt,
-            self.FOREGROUND_FPS,
-            len(self.foreground_frames),
-        )
-        self.marco_time, self.marco_frame = self._advance_loop(
-            self.marco_time,
-            self.marco_frame,
-            dt,
-            self.MARCO_FPS,
-            len(self.marco_frames),
-        )
-        self.stella_time, self.stella_frame = self._advance_loop(
-            self.stella_time,
-            self.stella_frame,
-            dt,
-            self.STELLA_FPS,
-            len(self.stella_frames),
-        )
+        for animation in (self.water_animation, self.foreground_animation,
+                          self.marco_animation, self.stella_animation):
+            animation.update(dt)
 
     def render(self, screen, title_alpha=0):
         screen.blit(self.background, (0, 0))
-        screen.blit(self.water_frames[self.water_frame], (0, 0))
-        screen.blit(self.foreground_frames[self.foreground_frame], (0, 0))
-        screen.blit(self.marco_frames[self.marco_frame], self.MARCO_POS)
-        screen.blit(self.stella_frames[self.stella_frame], self.STELLA_POS)
+        screen.blit(self.water_animation.current_frame, (0, 0))
+        screen.blit(self.foreground_animation.current_frame, (0, 0))
+        screen.blit(self.marco_animation.current_frame, self.MARCO_POS)
+        screen.blit(self.stella_animation.current_frame, self.STELLA_POS)
 
         if title_alpha > 0:
             # Copy so per-frame opacity never mutates AssetManager's cached image.

@@ -1,8 +1,8 @@
-"""Scene 09: two independent pixel-art sprites meet at their lip anchors."""
+"""Scene 09: two independent pixel-art sprites meet at their authored meeting anchors."""
 import pygame
 
 
-class LoveSilhouetteRenderer:
+class SilhouetteRenderer:
     def __init__(self, assets):
         self.background = assets.image("scene_09/cosmic_background", "scene_09/cosmic_background.png", alpha=False, required=True)
         self.boy = assets.image("scene_09/marco_silhouette", "scene_09/marco_silhouette.png", alpha=True, required=True)

@@ -1,7 +1,7 @@
 import pygame
 
 from game.core.scene import Scene
-from game.rendering.scene02_renderer import Scene02Renderer
+from game.rendering.marco_pov_renderer import MarcoPOVRenderer
 from game.systems.gaze import GazeSystem
 
 
@@ -16,7 +16,7 @@ class Scene02(Scene):
 
     def __init__(self, game, config):
         super().__init__(game, config)
-        self.renderer = Scene02Renderer(game.assets, config)
+        self.renderer = MarcoPOVRenderer(game.assets, config)
 
         self.horizontal_views = list(config.get("horizontal_views", []))
         self.sky_view = config.get("sky_view")
@@ -74,7 +74,7 @@ class Scene02(Scene):
         if requested_view is not None:
             # View navigation is active exploration, not inactivity. Reset the
             # contextual-help clock and dismiss any currently visible hint.
-            self.mark_help_progress()
+
             self.current_view = requested_view
 
     def update(self, dt):
@@ -86,14 +86,14 @@ class Scene02(Scene):
             if self.current_view == self.stella_view:
                 if not self.stella_seen:
                     self.stella_attention += dt
-                    self.mark_help_progress()
+
                     if self.stella_attention >= self.stella_required:
                         self.stella_seen = True
-                        self.mark_help_progress()  # fresh countdown to find the river
+
 
             elif self.current_view == self.river_view and self.stella_seen:
                 self.river_attention += dt
-                self.mark_help_progress()
+
                 if self.river_attention >= self.river_required:
                     self.progress_complete = True
                     self.dialogue_delay = float(

@@ -1,7 +1,7 @@
 import pygame
 
 from game.core.scene import Scene
-from game.rendering.scene01_renderer import Scene01Renderer
+from game.rendering.opening_sky_renderer import OpeningSkyRenderer
 
 
 class Scene01(Scene):
@@ -9,7 +9,7 @@ class Scene01(Scene):
 
     def __init__(self, game, config):
         super().__init__(game, config)
-        self.renderer = Scene01Renderer(self.game.assets)
+        self.renderer = OpeningSkyRenderer(self.game.assets)
         self.elapsed = 0.0
         self.title_alpha = 0.0
         self.title_state = "WAITING"

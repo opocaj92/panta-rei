@@ -34,7 +34,7 @@ class HandTracingSystem:
             self.tracing = False
 
     def update(self, dt):
-        self.hand_position.update(pygame.mouse.get_pos())
+        pass  # Mouse position is updated by logical-coordinate MOUSEMOTION events.
         for point in self.points:
             point[1] += dt
         self.points = [p for p in self.points if p[1] < self.trace_lifetime]

@@ -2,6 +2,7 @@ import json
 
 from game.core.config import DATA_DIR
 from game.core.config_validation import validate_scene_config
+from game.core.presentation import with_shared_presentation
 from game.scenes.scene_01 import Scene01
 from game.scenes.scene_02 import Scene02
 from game.scenes.scene_03 import Scene03
@@ -50,6 +51,8 @@ class SceneManager:
         with path.open("r", encoding="utf-8") as f:
             config = json.load(f)
 
+        if config.get("shared_presentation"):
+            config = with_shared_presentation(config, config["shared_presentation"])
         validate_scene_config(name, config)
         destination = config.get("next_scene")
         if destination is not None and destination not in SCENES:
