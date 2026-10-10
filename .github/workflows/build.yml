@@ -52,6 +52,48 @@ jobs:
           name: Panta-Rei-Linux
           path: dist/Panta Rei/
 
+  build-macos:
+    name: Build macOS
+    runs-on: macos-15-intel
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build macOS application
+        run: |
+          python -m PyInstaller \
+            --noconfirm \
+            --clean \
+            --windowed \
+            --name "Panta Rei" \
+            --icon "assets/icons/panta_rei.icns" \
+            --add-data "assets:assets" \
+            --add-data "data:data" \
+            main.py
+
+      - name: Package macOS application
+        run: |
+          cd dist
+          zip -r -y Panta-Rei-macOS.zip "Panta Rei.app"
+
+      - name: Upload macOS build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Panta-Rei-macOS
+          path: dist/Panta-Rei-macOS.zip
+
   build-android:
     name: Build Android (experimental)
     runs-on: ubuntu-22.04
