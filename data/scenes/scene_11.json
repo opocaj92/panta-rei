@@ -14,8 +14,8 @@
     "duration": 1.15
   },
   "help": {
-    "it": "Dopo che Stella ha finito di parlare, premi W o freccia su per guardare il cielo.",
-    "en": "After Stella finishes speaking, press W or the up arrow to look at the sky."
+    "it": "Premi W o freccia su per alzare lo sguardo.",
+    "en": "Press W or the up arrow to look up."
   },
   "presentation": {
     "shooting_star": {
@@ -35,7 +35,7 @@
   },
   "shared_presentation": "stella_riverbank",
   "touch_help": {
-    "it": "Dopo il dialogo, scorri verso l’alto per guardare il cielo.",
-    "en": "After the dialogue, swipe up to look at the sky."
+    "it": "Scorri verso l’alto per alzare lo sguardo.",
+    "en": "Swipe up to look up."
   }
 }

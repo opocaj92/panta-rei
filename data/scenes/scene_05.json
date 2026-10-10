@@ -22,11 +22,11 @@
   "post_dialogue_delay": 1.0,
   "next_scene": "scene_06",
   "help": {
-    "it": "Tieni premuto il tasto sinistro del mouse e trascina per tracciare.",
-    "en": "Hold the left mouse button and drag to trace."
+    "it": "Tieni premuto il tasto sinistro del mouse e trascina per tracciare la linea di confine.",
+    "en": "Hold the left mouse button and drag to trace the boundary line."
   },
   "touch_help": {
-    "it": "Traccia con un dito una linea dal fiume verso il mare.",
-    "en": "Use your finger to trace a line from the river toward the sea."
+    "it": "Traccia con un dito la linea di confine.",
+    "en": "Use your finger to trace the boundary line."
   }
 }

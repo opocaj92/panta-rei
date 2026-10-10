@@ -37,6 +37,32 @@ def _windows_user_locale():
         return None
 
 
+def _android_user_locale():
+    """Read the preferred app/device locale from Android's native APIs."""
+    if sys.platform != "android" and not os.environ.get("ANDROID_ARGUMENT"):
+        return None
+
+    try:
+        from jnius import autoclass
+
+        # Prefer the locale configured for this application, if available.
+        activity = autoclass("org.kivy.android.PythonActivity").mActivity
+        configuration = activity.getResources().getConfiguration()
+        if configuration is not None:
+            locales = configuration.getLocales()
+            if locales is not None and locales.size() > 0:
+                language = locales.get(0).getLanguage()
+                if language:
+                    return str(language)
+
+        # Fallback for unusual Android configurations.
+        language = autoclass("java.util.Locale").getDefault().getLanguage()
+        return str(language) if language else None
+    except Exception:
+        # JNI may be unavailable in some environments; never prevent startup.
+        return None
+
+
 def _fallback_locale_candidates():
     """Collect locale hints available through Python and the environment."""
     candidates = []
@@ -58,10 +84,15 @@ def _fallback_locale_candidates():
 def detect_language():
     """Return Italian for an Italian user locale; English for everything else.
 
+    On Android, query the application locale through the native Android API.
     On Windows the native user locale is authoritative because POSIX locale
     variables are commonly absent. If that query is unavailable, or on other
     operating systems, Python/environment locale hints are used as fallbacks.
     """
+    android_locale = _android_user_locale()
+    if android_locale:
+        return normalize_locale(android_locale)
+
     windows_locale = _windows_user_locale()
     if windows_locale:
         return normalize_locale(windows_locale)

@@ -19,11 +19,11 @@
     "duration": 1.2
   },
   "help": {
-    "it": "Trascina una sagoma verso l’altra per avvicinarle. Dopo il bacio, trascinale per separarle.",
-    "en": "Drag either silhouette inward to bring them closer. After the kiss, drag outward to separate them."
+    "it": "Trascina una sagoma verso l’altra per avvicinarle. Poi trascinale per separarle.",
+    "en": "Drag either silhouette inward to bring them closer. Then drag outward to separate them."
   },
   "touch_help": {
-    "it": "Trascina una sagoma verso l’altra, poi allontanale.",
-    "en": "Drag a silhouette inward, then outward."
+    "it": "Trascina una sagoma verso l’altra per avvicinarle. Poi trascinale per separarle.",
+    "en": "Drag either silhouette inward to bring them closer. Then drag outward to separate them."
   }
 }

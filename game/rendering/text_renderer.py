@@ -1,4 +1,5 @@
 import math
+from functools import lru_cache
 import pygame
 from game.core.typography import Typography
 
@@ -18,10 +19,10 @@ class TextRenderer:
         self._font_styles = {id(self.font): "dialogue", id(self.speaker_font): "speaker",
                              id(self.thought_font): "thought", id(self.help_font): "help"}
 
-    def begin_frame(self, size, scale):
-        """Draw glyphs at output resolution, while boxes stay on the pixel canvas."""
+    def begin_frame(self, size, scale, native_text=False):
+        """Use native-canvas glyphs on Android; keep sharp desktop overlays."""
         self.scale = float(scale)
-        self.overlay = pygame.Surface(size, pygame.SRCALPHA)
+        self.overlay = None if native_text else pygame.Surface(size, pygame.SRCALPHA)
 
     def _text(self, screen, font, label, color, x, y, center=False):
         if self.overlay is None:
@@ -42,6 +43,7 @@ class TextRenderer:
         self.overlay.blit(glyph, rect)
 
     @staticmethod
+    @lru_cache(maxsize=512)
     def _wrap(text, font, max_width):
         """Wrap by measured glyph width, including words wider than the box."""
         if not text:
@@ -64,7 +66,7 @@ class TextRenderer:
                         current = ""
                     current += char
             lines.append(current)
-        return lines
+        return tuple(lines)
 
     def dialogue(self, screen, dialogue, rect=None):
         line = dialogue.current_line

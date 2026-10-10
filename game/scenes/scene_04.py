@@ -89,6 +89,15 @@ class Scene04(Scene):
             direction = direction.normalize()
             self.camera += direction * self.camera_speed * dt
 
+        self._clamp_camera()
+
+    def pan_touch(self, dx, dy):
+        """Move the landscape with the finger during an Android drag."""
+        self.camera.x -= dx
+        self.camera.y -= dy
+        self._clamp_camera()
+
+    def _clamp_camera(self):
         screen_width, screen_height = self.game.screen.get_size()
         max_x = max(0.0, self.world_width - screen_width)
         max_y = max(0.0, self.world_height - screen_height)
