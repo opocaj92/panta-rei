@@ -7,23 +7,28 @@ jobs:
   build-windows:
     name: Build Windows
     runs-on: windows-latest
+
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
+
       - name: Build Windows executable
         run: |
           python -m PyInstaller --noconfirm --clean --windowed --name "Panta Rei" --icon "assets/icons/panta_rei.ico" --add-data "assets:assets" --add-data "data:data" main.py
+
       - name: Upload Windows build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Panta-Rei-Windows
           path: dist/Panta Rei/
@@ -31,23 +36,45 @@ jobs:
   build-linux:
     name: Build Linux
     runs-on: ubuntu-22.04
+
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
+
       - name: Build Linux executable
         run: |
           python -m PyInstaller --noconfirm --clean --name "Panta Rei" --add-data "assets:assets" --add-data "data:data" main.py
+
+      - name: Create Linux launcher
+        run: |
+          cat > "dist/Panta Rei/Panta Rei.desktop" <<'EOF'
+          [Desktop Entry]
+          Version=1.0
+          Type=Application
+          Name=Panta Rei
+          Comment=A narrative pixel-art game
+          Exec=sh -c 'cd "$(dirname "$1")" && exec "./Panta Rei"' sh %k
+          Icon=panta_rei
+          Terminal=false
+          Categories=Game;
+          EOF
+
+          mkdir -p "dist/Panta Rei/icons"
+          cp assets/icons/panta_rei_512.png "dist/Panta Rei/icons/panta_rei.png"
+
       - name: Upload Linux build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Panta-Rei-Linux
           path: dist/Panta Rei/
@@ -58,10 +85,10 @@ jobs:
 
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -89,7 +116,7 @@ jobs:
           zip -r -y Panta-Rei-macOS.zip "Panta Rei.app"
 
       - name: Upload macOS build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Panta-Rei-macOS
           path: dist/Panta-Rei-macOS.zip
@@ -100,13 +127,13 @@ jobs:
     timeout-minutes: 120
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
@@ -130,17 +157,80 @@ jobs:
           buildozer -v android debug
       - name: Upload Android APK
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Panta-Rei-Android-APK
           path: bin/*.apk
           if-no-files-found: error
       - name: Upload Android build logs on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Panta-Rei-Android-Logs
           path: |
             .buildozer/android/platform/build-*/dists/*/build/outputs/logs/*
             .buildozer/android/platform/build-*/dists/*/build/reports/**
+          if-no-files-found: ignore
+
+  build-ios:
+    name: Build iOS Simulator (experimental)
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Show Xcode version
+        run: xcodebuild -version
+      - name: Install pygame-ios packaging tool
+        run: python -m pip install pygame-ios==0.0.5
+      - name: Check iOS package inputs
+        run: |
+          test -f main.py
+          test -f assets/icons/panta_rei_1024.png
+          test -d game
+          test -d assets
+          test -d data
+      - name: Generate iOS Xcode project
+        run: |
+          python -m pygame_ios . main.py 2.5.6
+      - name: Configure iOS icon and landscape orientation
+        run: python scripts/configure_ios_project.py
+      - name: Build unsigned iOS Simulator app
+        run: |
+          set -o pipefail
+          PROJECT="$(find . -name '*.xcodeproj' -not -path './.buildozer/*' -print -quit)"
+          if [ -z "$PROJECT" ]; then echo 'pygame-ios did not generate an Xcode project'; exit 1; fi
+          echo "Xcode project: $PROJECT"
+          xcodebuild -list -project "$PROJECT"
+          SCHEME="$(xcodebuild -list -json -project "$PROJECT" | python -c 'import json,sys; p=json.load(sys.stdin)["project"]; print((p.get("schemes") or p.get("targets") or [""])[0])')"
+          test -n "$SCHEME"
+          xcodebuild -project "$PROJECT" -scheme "$SCHEME" \
+            -configuration Debug -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/panta-ios-derived" \
+            CODE_SIGNING_ALLOWED=NO build
+      - name: Package simulator application
+        run: |
+          set -e
+          APP="$(find "$RUNNER_TEMP/panta-ios-derived/Build/Products" -name '*.app' -type d -print -quit)"
+          test -n "$APP"
+          mkdir -p ios-artifacts
+          ditto -c -k --sequesterRsrc --keepParent "$APP" ios-artifacts/Panta-Rei-iOS-Simulator.zip
+      - name: Upload iOS Simulator build
+        uses: actions/upload-artifact@v5
+        with:
+          name: Panta-Rei-iOS-Simulator-Experimental
+          path: ios-artifacts/Panta-Rei-iOS-Simulator.zip
+          if-no-files-found: error
+      - name: Upload generated Xcode project on failure
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: Panta-Rei-iOS-Diagnostics
+          path: |
+            pygame-ios-template/**
           if-no-files-found: ignore
