@@ -131,7 +131,14 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.10"
+      - name: Cache Android build dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.buildozer
+            .buildozer
+          key: android-buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}-v1
       - name: Set up Java
         uses: actions/setup-java@v6
         with:
