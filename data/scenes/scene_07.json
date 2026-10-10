@@ -19,5 +19,9 @@
     "it": "Premi W o freccia su per alzare lo sguardo.",
     "en": "Press W or the up arrow to look up."
   },
-  "shared_presentation": "stella_pov"
+  "shared_presentation": "stella_pov",
+  "touch_help": {
+    "it": "Scorri verso l’alto per alzare lo sguardo.",
+    "en": "Swipe up to look up."
+  }
 }

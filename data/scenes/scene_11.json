@@ -18,5 +18,9 @@
     "en": "After Stella finishes speaking, press W or the up arrow to look at the sky."
   },
   "presentation": {},
-  "shared_presentation": "stella_riverbank"
+  "shared_presentation": "stella_riverbank",
+  "touch_help": {
+    "it": "Dopo il dialogo, scorri verso l’alto per guardare il cielo.",
+    "en": "After the dialogue, swipe up to look at the sky."
+  }
 }

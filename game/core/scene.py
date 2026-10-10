@@ -73,7 +73,7 @@ class Scene:
 
     def get_help_text(self):
         """Resolve this scene's help text using the active language and fallbacks."""
-        help_cfg = self.config.get("help")
+        help_cfg = (self.config.get("touch_help") if getattr(self.game, "touch_enabled", False) else None) or self.config.get("help")
         if not help_cfg:
             return None
         if isinstance(help_cfg, str):

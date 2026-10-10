@@ -164,6 +164,7 @@ class Scene05(Scene):
             draw_flow=True,
         )
         self.hand.render_trace(screen)
-        self.hand.render_hand(screen)
+        if not getattr(self.game, "touch_enabled", False):
+            self.hand.render_hand(screen)
         self.game.text_renderer.dialogue(screen, self.game.dialogue)
 

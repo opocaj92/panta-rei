@@ -18,7 +18,7 @@ class Scene02(Scene):
     }
     VIEW_MIX = {
         "river": {"river": 0.32, "wind": 0.22, "vegetation": 0.08, "phone": 0.08},
-        "stella": {"river": 0.12, "wind": 0.18, "vegetation": 0.05, "phone": 0.65},
+        "stella": {"river": 0.12, "wind": 0.18, "vegetation": 0.05, "phone": 0.30},
         "grass": {"river": 0.08, "wind": 0.32, "vegetation": 0.80, "phone": 0.02},
         "city": {"river": 0.09, "wind": 0.35, "vegetation": 0.10, "phone": 0.02},
         "sky": {"river": 0.07, "wind": 0.48, "vegetation": 0.05, "phone": 0.0},

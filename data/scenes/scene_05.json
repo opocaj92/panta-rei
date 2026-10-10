@@ -24,5 +24,9 @@
   "help": {
     "it": "Tieni premuto il tasto sinistro del mouse e trascina per tracciare.",
     "en": "Hold the left mouse button and drag to trace."
+  },
+  "touch_help": {
+    "it": "Traccia con un dito una linea dal fiume verso il mare.",
+    "en": "Use your finger to trace a line from the river toward the sea."
   }
 }

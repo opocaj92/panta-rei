@@ -7,26 +7,21 @@ jobs:
   build-windows:
     name: Build Windows
     runs-on: windows-latest
-
     steps:
       - name: Check out source
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
-
       - name: Build Windows executable
         run: |
           python -m PyInstaller --noconfirm --clean --windowed --name "Panta Rei" --icon "assets/icons/panta_rei.ico" --add-data "assets:assets" --add-data "data:data" main.py
-
       - name: Upload Windows build
         uses: actions/upload-artifact@v4
         with:
@@ -36,87 +31,74 @@ jobs:
   build-linux:
     name: Build Linux
     runs-on: ubuntu-22.04
-
     steps:
       - name: Check out source
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
-
       - name: Build Linux executable
         run: |
           python -m PyInstaller --noconfirm --clean --name "Panta Rei" --add-data "assets:assets" --add-data "data:data" main.py
-
-      - name: Create Linux launcher
-        run: |
-          cat > "dist/Panta Rei/Panta Rei.desktop" <<'EOF'
-          [Desktop Entry]
-          Version=1.0
-          Type=Application
-          Name=Panta Rei
-          Comment=A narrative pixel-art game
-          Exec=sh -c 'cd "$(dirname "$1")" && exec "./Panta Rei"' sh %k
-          Icon=panta_rei
-          Terminal=false
-          Categories=Game;
-          EOF
-
-          mkdir -p "dist/Panta Rei/icons"
-          cp assets/icons/panta_rei_512.png "dist/Panta Rei/icons/panta_rei.png"
-
       - name: Upload Linux build
         uses: actions/upload-artifact@v4
         with:
           name: Panta-Rei-Linux
           path: dist/Panta Rei/
 
-  build-macos:
-    name: Build macOS
-    runs-on: macos-15-intel
-
+  build-android:
+    name: Build Android (experimental)
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
     steps:
       - name: Check out source
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-
-      - name: Install dependencies
+          python-version: "3.11"
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Install Android build dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pyinstaller
-
-      - name: Build macOS application
+          sudo apt-get update
+          sudo apt-get install -y git zip unzip autoconf automake libtool pkg-config cmake ninja-build libffi-dev libssl-dev zlib1g-dev libncurses-dev libtinfo6
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install buildozer cython
+      - name: Check Android package inputs
         run: |
-          python -m PyInstaller \
-            --noconfirm \
-            --clean \
-            --windowed \
-            --name "Panta Rei" \
-            --icon "assets/icons/panta_rei.icns" \
-            --add-data "assets:assets" \
-            --add-data "data:data" \
-            main.py
-
-      - name: Package macOS application
+          test -f main.py
+          test -f buildozer.spec
+          test -f assets/icons/panta_rei_android.png
+          test -d assets
+          test -d data
+      - name: Build Android debug APK
+        env:
+          BUILDOZER_WARN_ON_ROOT: "0"
         run: |
-          cd dist
-          zip -r -y Panta-Rei-macOS.zip "Panta Rei.app"
-
-      - name: Upload macOS build
+          buildozer -v android debug
+      - name: Upload Android APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: Panta-Rei-macOS
-          path: dist/Panta-Rei-macOS.zip
+          name: Panta-Rei-Android-APK
+          path: bin/*.apk
+          if-no-files-found: error
+      - name: Upload Android build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Panta-Rei-Android-Logs
+          path: |
+            .buildozer/android/platform/build-*/dists/*/build/outputs/logs/*
+            .buildozer/android/platform/build-*/dists/*/build/reports/**
+          if-no-files-found: ignore

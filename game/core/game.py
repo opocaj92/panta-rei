@@ -1,4 +1,6 @@
 import pygame
+import os
+from game.systems.touch_gestures import TouchGestures
 from .config import ASSETS_DIR, FPS, WINDOW_HEIGHT, WINDOW_TITLE, WINDOW_WIDTH
 from .asset_manager import AssetManager
 from .audio_manager import AudioManager
@@ -28,7 +30,9 @@ class Game:
         self.fullscreen = True
         self.clock = pygame.time.Clock()
 
+        self.touch_enabled = os.environ.get("PANTA_REI_TOUCH", "").lower() in ("1", "true", "yes") or os.environ.get("ANDROID_ARGUMENT") is not None
         self.input = InputManager()
+        self.touch = TouchGestures(self)
         self.assets = AssetManager()
         self.audio = AudioManager()
         self.language = detect_language()
@@ -64,7 +68,7 @@ class Game:
         Scene 05 uses its own animated pointing hand instead of the OS cursor.
         """
         pygame.mouse.set_visible(
-            self.scenes.current_name in {"scene_08", "scene_09", "scene_10"}
+            not self.touch_enabled and self.scenes.current_name in {"scene_08", "scene_09", "scene_10"}
         )
 
     def run(self, start_scene="scene_01", start_state=None):
@@ -77,49 +81,63 @@ class Game:
 
             # Raw events are offered to both the frame-level input tracker and
             # the active scene; this preserves event-sensitive scene mechanics.
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    self.fullscreen = not self.fullscreen
-                    self._set_display(self.fullscreen)
-                    self.update_cursor_visibility()
-                    continue  # Escape only changes display mode, not scene input.
-                if event.type == pygame.WINDOWMAXIMIZED and not self.fullscreen:
-                    # Treat the native maximize button as a request for true fullscreen.
-                    self.fullscreen = True
-                    self._set_display(True)
-                    self.update_cursor_visibility()
-                    continue
-                if event.type in (pygame.WINDOWRESIZED, pygame.WINDOWSIZECHANGED):
-                    # Keep the 640x360 canvas letterboxed if the OS resizes the window.
-                    if not self.fullscreen:
-                        self._update_viewport()
-                    continue
-                if event.type in (pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP):
-                    fields = {'pos': self.logical_mouse(event.pos)}
-                    if event.type == pygame.MOUSEMOTION:
-                        fields['rel'] = (round(event.rel[0] / self.scale), round(event.rel[1] / self.scale))
-                        fields['buttons'] = event.buttons
-                    else:
-                        fields['button'] = event.button
-                    event = pygame.event.Event(event.type, fields)
-                self.input.handle_event(event)
-
-                # Use the same dialogue keys everywhere, but never advance
-                # lines a scene has not yet made available to the player.
-                if (
-                    event.type == pygame.KEYDOWN
-                    and event.key in (pygame.K_RETURN, pygame.K_BACKSPACE)
-                ):
-                    scene = self.scenes.current
-                    if scene is not None and scene.allows_dialogue_advance():
+            for raw_event in pygame.event.get():
+                # SDL may also synthesize mouse events for touch. Never dispatch both.
+                if self.touch_enabled and raw_event.type in (pygame.FINGERDOWN, pygame.FINGERMOTION, pygame.FINGERUP):
+                    events, tapped, pan = self.touch.handle(raw_event)
+                    if pan != (0, 0) and self.scenes.current_name == "scene_04":
+                        self.scenes.current.pan_touch(*pan)
+                    if tapped and self.scenes.current is not None and self.scenes.current.allows_dialogue_advance():
                         self.dialogue.advance()
+                elif self.touch_enabled and raw_event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION):
+                    # On Android mouse events are normally emulated from fingers.
+                    continue
+                else:
+                    events = [raw_event]
+                for event in events:
+                    from_touch = event is not raw_event
+                    if event.type == pygame.QUIT:
+                        self.running = False
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE and not self.touch_enabled:
+                        self.fullscreen = not self.fullscreen
+                        self._set_display(self.fullscreen)
+                        self.update_cursor_visibility()
+                        continue  # Escape only changes display mode, not scene input.
+                    if event.type == pygame.WINDOWMAXIMIZED and not self.fullscreen:
+                        # Treat the native maximize button as a request for true fullscreen.
+                        self.fullscreen = True
+                        self._set_display(True)
+                        self.update_cursor_visibility()
+                        continue
+                    if event.type in (pygame.WINDOWRESIZED, pygame.WINDOWSIZECHANGED):
+                        # Keep the 640x360 canvas letterboxed if the OS resizes the window.
+                        if not self.fullscreen:
+                            self._update_viewport()
+                        continue
+                    if not from_touch and event.type in (pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP):
+                        fields = {'pos': self.logical_mouse(event.pos)}
+                        if event.type == pygame.MOUSEMOTION:
+                            fields['rel'] = (round(event.rel[0] / self.scale), round(event.rel[1] / self.scale))
+                            fields['buttons'] = event.buttons
+                        else:
+                            fields['button'] = event.button
+                        event = pygame.event.Event(event.type, fields)
+                    self.input.handle_event(event)
 
-                active_before = self.scenes.current
-                self.scenes.handle_input(event)
-                if self.scenes.current is not active_before:
-                    break  # Do not dispatch buffered events to the newly entered scene.
+                    # Use the same dialogue keys everywhere, but never advance
+                    # lines a scene has not yet made available to the player.
+                    if (
+                        event.type == pygame.KEYDOWN
+                        and event.key in (pygame.K_RETURN, pygame.K_BACKSPACE)
+                    ):
+                        scene = self.scenes.current
+                        if scene is not None and scene.allows_dialogue_advance():
+                            self.dialogue.advance()
+
+                    active_before = self.scenes.current
+                    self.scenes.handle_input(event)
+                    if self.scenes.current is not active_before:
+                        break  # Do not dispatch buffered events to the newly entered scene.
 
             self.scenes.update(dt)
             self.transitions.update(dt)

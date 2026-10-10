@@ -49,5 +49,9 @@
       }
     }
   },
-  "shared_presentation": "stella_riverbank"
+  "shared_presentation": "stella_riverbank",
+  "touch_help": {
+    "it": "Scorri a sinistra o destra per cambiare vista, verso l’alto per il cielo e verso il basso per tornare.",
+    "en": "Swipe left or right to change view, up to see the sky, and down to return."
+  }
 }

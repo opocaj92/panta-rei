@@ -22,5 +22,9 @@
   "help": {
     "it": "Usa WASD o le frecce per seguire il fiume.",
     "en": "Use WASD or the arrow keys to follow the river."
+  },
+  "touch_help": {
+    "it": "Trascina il paesaggio per seguire il fiume.",
+    "en": "Drag the landscape to follow the river."
   }
 }

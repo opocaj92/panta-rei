@@ -16,7 +16,7 @@ class Scene10(Scene):
         self.river_drag = None
         self.completion_timer = CompletionTimer()
         self.arrival_played = False
-        self.music_gain = 0.23
+        self.music_gain = 0.32
         self.harmony_gain = 0.0
 
     @property
@@ -32,7 +32,7 @@ class Scene10(Scene):
 
         self.river_drag = RiverDragSystem(self.interaction_cfg, self.game.screen.get_size())
         self.arrival_played = False
-        self.music_gain = 0.23
+        self.music_gain = 0.32
         self.harmony_gain = 0.0
         # Scene 09 leaves this track playing: updating its volume does not restart it.
         self.game.audio.play_music("scene09_suspended_atmosphere", volume=self.music_gain)
@@ -49,8 +49,8 @@ class Scene10(Scene):
         if self.river_drag.connected:
             progress = 1.0
         # Smooth the two gains independently; the second layer grows with progress.
-        target_music = 0.23 + 0.13 * progress
-        target_harmony = 0.42 * (progress ** 1.6)
+        target_music = 0.32 + 0.18 * progress
+        target_harmony = 0.56 * (progress ** 1.6)
         smoothing = min(1.0, max(0.0, dt) * 2.5)
         self.music_gain += (target_music - self.music_gain) * smoothing
         self.harmony_gain += (target_harmony - self.harmony_gain) * smoothing
@@ -60,7 +60,7 @@ class Scene10(Scene):
         if self.river_drag.connected and not self.arrival_played:
             self.arrival_played = True
             self.game.audio.play_sfx("scene09_kiss_shimmer", volume=0.48)
-            self.game.audio.play_sfx("scene10_arrival_resolution", volume=0.56)
+            self.game.audio.play_sfx("scene10_arrival_resolution", volume=0.70)
         self.game.dialogue.update(dt)
         if self.river_drag.connected and self.game.dialogue.finished:
             elapsed = self.completion_timer.update(dt, active=True)
