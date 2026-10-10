@@ -1,3 +1,4 @@
+import math
 import pygame
 from game.core.typography import Typography
 
@@ -145,8 +146,16 @@ class TextRenderer:
         if not text:
             return
         padding_x, padding_y = 11, 7
-        surface = self.help_font.render(text, True, (245, 245, 245))
-        box = pygame.Surface((surface.get_width()+2*padding_x, surface.get_height()+2*padding_y), pygame.SRCALPHA)
+        # Measure the font used for actual drawing: text is rendered onto a
+        # display-resolution overlay, which may have different glyph metrics.
+        if self.overlay is not None:
+            display_font = self.typography.scaled("help", self.scale)
+            text_width, text_height = display_font.size(text)
+            text_width = math.ceil(text_width / self.scale)
+            text_height = math.ceil(text_height / self.scale)
+        else:
+            text_width, text_height = self.help_font.size(text)
+        box = pygame.Surface((text_width + 2 * padding_x, text_height + 2 * padding_y), pygame.SRCALPHA)
         box.fill((0, 0, 0, 190))
         x = (screen.get_width() - box.get_width()) // 2
         y = 14

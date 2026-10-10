@@ -1,32 +1,41 @@
 {
   "dialogue": {
-    "size": 17
+    "size": 17,
+    "path": "fonts/VT323-Regular.ttf"
   },
   "speaker": {
-    "size": 21
+    "size": 21,
+    "path": "fonts/VT323-Regular.ttf"
   },
   "thought": {
     "size": 15,
-    "italic": true
+    "italic": true,
+    "path": "fonts/VT323-Regular.ttf"
   },
   "help": {
-    "size": 14
+    "size": 14,
+    "path": "fonts/VT323-Regular.ttf"
   },
   "credits_role": {
-    "size": 9
+    "size": 9,
+    "path": "fonts/VT323-Regular.ttf"
   },
   "credits_name": {
-    "size": 12
+    "size": 12,
+    "path": "fonts/VT323-Regular.ttf"
   },
   "credits_other": {
     "size": 10,
-    "italic": true
+    "italic": true,
+    "path": "fonts/VT323-Regular.ttf"
   },
   "credits_title": {
-    "size": 18
+    "size": 18,
+    "path": "fonts/VT323-Regular.ttf"
   },
   "credits_subtitle": {
     "size": 10,
-    "italic": true
+    "italic": true,
+    "path": "fonts/VT323-Regular.ttf"
   }
 }

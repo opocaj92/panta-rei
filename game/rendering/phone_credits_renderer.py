@@ -21,6 +21,7 @@ class PhoneCreditsRenderer:
         self.credit_height = 0
         self._entries = []
         self._scaled_cache = {}
+        self._static_cache = {}
 
     @staticmethod
     def outlined_text(font, label, color, outline=(8, 13, 25), radius=1):
@@ -143,16 +144,44 @@ class PhoneCreditsRenderer:
         """Draw the complete credits presentation; narrative timing stays in Scene 12."""
         credits = pygame.Surface((max(1, round(self.glass.width * scale)),
                                   max(1, round(self.glass.height * scale))), pygame.SRCALPHA)
-        if phase in ("title", "final"):
-            title = self.outlined_text(self.typography.font("credits_title", scale), "PANTA REI", (246, 241, 228), radius=max(1, round(scale)))
-            subtitle = self.outlined_text(self.typography.font("credits_subtitle", scale), "A game by Jacopo Castellini", (180, 194, 209), radius=max(1, round(scale)))
-            if subtitle.get_width() > round((self.glass.width - 8) * scale):
-                subtitle = pygame.transform.smoothscale(subtitle, (round((self.glass.width - 8) * scale), subtitle.get_height()))
-            alpha = min(255, int(255 * min(1.0, phase_time / 0.7)))
-            title.set_alpha(alpha)
-            subtitle.set_alpha(alpha)
-            credits.blit(title, ((credits.get_width() - title.get_width()) // 2, round((self.glass.centery - 21) * scale)))
-            credits.blit(subtitle, ((credits.get_width() - subtitle.get_width()) // 2, round((self.glass.centery + 8) * scale)))
+        if phase in ("final", "title"):
+            key = (phase, round(scale, 5))
+            static = self._static_cache.get(key)
+            if static is None:
+                static = pygame.Surface(credits.get_size(), pygame.SRCALPHA)
+                if phase == "final":
+                    # The final message replaces the authorship title; the opening title stays unchanged.
+                    lines = (
+                        ("A special thank to", "credits_subtitle", (180, 194, 209)),
+                        ("YOU", "credits_title", (246, 241, 228)),
+                        ("for playing Panta Rei", "credits_subtitle", (180, 194, 209)),
+                    )
+                    glyphs = []
+                    for label, style, color in lines:
+                        glyph = self.outlined_text(self.typography.font(style, scale), label, color,
+                                                   radius=max(1, round(scale)))
+                        max_width = round((self.glass.width - 8) * scale)
+                        if glyph.get_width() > max_width:
+                            ratio = max_width / glyph.get_width()
+                            glyph = pygame.transform.smoothscale(glyph,
+                                (max_width, max(1, round(glyph.get_height() * ratio))))
+                        glyphs.append(glyph)
+                    spacing = round(8 * scale)
+                    total_height = sum(g.get_height() for g in glyphs) + 2 * spacing
+                    y = (credits.get_height() - total_height) // 2
+                    for glyph in glyphs:
+                        static.blit(glyph, ((credits.get_width() - glyph.get_width()) // 2, y))
+                        y += glyph.get_height() + spacing
+                elif phase == "title":
+                    title = self.outlined_text(self.typography.font("credits_title", scale), "PANTA REI", (246, 241, 228), radius=max(1, round(scale)))
+                    subtitle = self.outlined_text(self.typography.font("credits_subtitle", scale), "A game by Jacopo Castellini", (180, 194, 209), radius=max(1, round(scale)))
+                    if subtitle.get_width() > round((self.glass.width - 8) * scale):
+                        subtitle = pygame.transform.smoothscale(subtitle, (round((self.glass.width - 8) * scale), subtitle.get_height()))
+                    static.blit(title, ((credits.get_width() - title.get_width()) // 2, round((self.glass.centery - 21) * scale)))
+                    static.blit(subtitle, ((credits.get_width() - subtitle.get_width()) // 2, round((self.glass.centery + 8) * scale)))
+                self._static_cache[key] = static
+            credits.blit(static, (0, 0))
+            credits.fill((255, 255, 255, min(255, int(255 * min(1.0, phase_time / 0.7)))), special_flags=pygame.BLEND_RGBA_MULT)
         else:
             y = round((self.glass.top + scroll_y) * scale)
             for surf, gap in (self.credit_surfaces if scale == 1.0 else self._scaled_entries(scale)):

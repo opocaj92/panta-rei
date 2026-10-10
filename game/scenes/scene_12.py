@@ -1,6 +1,7 @@
 import math
 
 from game.core.scene import Scene
+from game.scenes.scene_02 import Scene02
 from game.rendering.stella_pov_renderer import StellaPOVRenderer
 from game.rendering.phone_credits_renderer import PhoneCreditsRenderer
 
@@ -29,6 +30,12 @@ class Scene12(Scene):
         self.fade_started = False
         self.terminal_black = False
         self._build_credits()
+        # Scene 11's sky ambience continues through its full black hold.
+        # Begin the handoff only as the credits fade into view.
+        reveal_ms = round(float(self.config.get('transition_in', {}).get('duration', 1.0)) * 1000)
+        for name in Scene02.AUDIO_LAYERS:
+            self.game.audio.set_ambience_layer_volume(name, 0.0, fade_ms=reveal_ms)
+        self.game.audio.play_music('scene12_final_credits', fade_ms=reveal_ms, restart=True)
 
     def handle_input(self, event):
         return
@@ -42,6 +49,7 @@ class Scene12(Scene):
 
     def update(self, dt):
         self.elapsed += dt
+        self.game.audio.update_ambience_layers(dt)
         if self.terminal_black:
             return
         self.phase_time += dt
@@ -64,11 +72,16 @@ class Scene12(Scene):
             if self.phase_time >= float(self.config.get('final_hold_duration', 3.0)):
                 self.fade_started = True
                 transition = self.config.get('transition_out', {})
-                self.game.transitions.fade_to_black(
-                    float(transition.get('duration', 1.5)), on_complete=self._finish)
+                duration = float(transition.get('duration', 1.5))
+                self.game.audio.stop_music(fade_ms=round(duration * 1000))
+                self.game.transitions.fade_to_black(duration, on_complete=self._finish)
 
     def _finish(self):
         self.terminal_black = True
+        # The permanent black screen must also be completely silent.
+        self.game.audio.stop_music()
+        self.game.audio.stop_ambience_layers()
+        self.game.audio.stop_ambience()
 
     def render(self, screen):
         camera_y = float(self.config.get('camera_y', 360.0))

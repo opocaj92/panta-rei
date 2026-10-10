@@ -11,9 +11,12 @@ class Scene06(BlackScreenDialogueScene):
 
     def enter(self):
         super().enter()
+        # Preserve the river layer inherited from Scene 05.
+        # The piano was faded during Scene 05's outgoing transition.
         self.completion_timer.reset()
 
     def update(self, dt):
+        self.game.audio.update_ambience_layers(dt)
         super().update(dt)
         if self.game.dialogue.finished and not self.transition_started:
             elapsed = self.completion_timer.update(dt, active=True)

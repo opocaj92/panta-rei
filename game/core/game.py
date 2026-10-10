@@ -1,6 +1,7 @@
 import pygame
-from .config import FPS, WINDOW_HEIGHT, WINDOW_TITLE, WINDOW_WIDTH
+from .config import ASSETS_DIR, FPS, WINDOW_HEIGHT, WINDOW_TITLE, WINDOW_WIDTH
 from .asset_manager import AssetManager
+from .audio_manager import AudioManager
 from .typography import Typography
 from .dialogue_manager import DialogueManager
 from .input_manager import InputManager
@@ -15,6 +16,9 @@ class Game:
     def __init__(self):
         pygame.init()
         pygame.display.set_caption(WINDOW_TITLE)
+        icon_path = ASSETS_DIR / "icons" / "panta_rei_64.png"
+        if icon_path.is_file():
+            pygame.display.set_icon(pygame.image.load(str(icon_path)))
         # Scene logic stays at 640x360; only glyphs use physical display pixels.
         self.screen = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
         self.display = None
@@ -26,6 +30,7 @@ class Game:
 
         self.input = InputManager()
         self.assets = AssetManager()
+        self.audio = AudioManager()
         self.language = detect_language()
         self.dialogue = DialogueManager(language=self.language)
         self.typography = Typography(self.assets)
@@ -39,6 +44,9 @@ class Game:
             self.display = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         else:
             self.display = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self._update_viewport()
+
+    def _update_viewport(self):
         w, h = self.display.get_size()
         self.scale = min(w / WINDOW_WIDTH, h / WINDOW_HEIGHT)
         vw, vh = round(WINDOW_WIDTH * self.scale), round(WINDOW_HEIGHT * self.scale)
@@ -77,6 +85,17 @@ class Game:
                     self._set_display(self.fullscreen)
                     self.update_cursor_visibility()
                     continue  # Escape only changes display mode, not scene input.
+                if event.type == pygame.WINDOWMAXIMIZED and not self.fullscreen:
+                    # Treat the native maximize button as a request for true fullscreen.
+                    self.fullscreen = True
+                    self._set_display(True)
+                    self.update_cursor_visibility()
+                    continue
+                if event.type in (pygame.WINDOWRESIZED, pygame.WINDOWSIZECHANGED):
+                    # Keep the 640x360 canvas letterboxed if the OS resizes the window.
+                    if not self.fullscreen:
+                        self._update_viewport()
+                    continue
                 if event.type in (pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP):
                     fields = {'pos': self.logical_mouse(event.pos)}
                     if event.type == pygame.MOUSEMOTION:
@@ -120,4 +139,5 @@ class Game:
             self.text_renderer.overlay = None
             pygame.display.flip()
 
+        self.audio.shutdown()
         pygame.quit()

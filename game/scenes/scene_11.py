@@ -2,6 +2,7 @@ import math
 import pygame
 
 from game.core.scene import Scene
+from game.scenes.scene_02 import Scene02
 from game.rendering.sky_panorama_renderer import SkyPanoramaRenderer
 
 
@@ -33,6 +34,26 @@ class Scene11(Scene):
         self.look_interaction_started = False
         self.renderer.reset()
         self.game.dialogue.load("scene_11")
+        # Return from the abstract interlude to Scene 02's original soundscape.
+        # These channels remain running throughout the upward pan.
+        self.game.audio.start_ambience_layers(Scene02.AUDIO_LAYERS)
+        self._set_audio_mix(Scene02.VIEW_MIX["stella"], fade_ms=900)
+
+    def _set_audio_mix(self, mix, *, fade_ms=0):
+        for name in Scene02.AUDIO_LAYERS:
+            self.game.audio.set_ambience_layer_volume(
+                name, mix.get(name, 0.0), fade_ms=fade_ms
+            )
+
+    def _update_gaze_audio(self):
+        # Match the camera's smoothstep rather than a separate audio timer.
+        t = self._smoothstep(self.gaze_progress)
+        stella = Scene02.VIEW_MIX["stella"]
+        sky = Scene02.VIEW_MIX["sky"]
+        self._set_audio_mix({
+            name: stella[name] + (sky[name] - stella[name]) * t
+            for name in Scene02.AUDIO_LAYERS
+        })
 
     def handle_input(self, event):
         # Intentionally accept no input until the dialogue has *already* ended.
@@ -47,6 +68,7 @@ class Scene11(Scene):
             self.phase_timer = 0.0
 
     def update(self, dt):
+        self.game.audio.update_ambience_layers(dt)
         self.renderer.update(dt, sky_complete=self.phase in ("sky_hold", "fading_out", "black_hold", "done"))
         if self.phase == "dialogue":
             self.speaking_time += dt
@@ -62,6 +84,7 @@ class Scene11(Scene):
             duration = max(float(self.config.get("gaze_move_duration", 1.15)), 0.001)
             self.phase_timer += dt
             self.gaze_progress = min(1.0, self.phase_timer / duration)
+            self._update_gaze_audio()
             if self.gaze_progress >= 1.0:
                 self.phase = "sky_hold"
                 self.phase_timer = 0.0
@@ -75,6 +98,8 @@ class Scene11(Scene):
                 if not self.fade_started:
                     self.fade_started = True
                     transition = self.config.get("transition_out", {})
+                    # Preserve the sky ambience through the fade and black hold.
+                    # Scene 12 crossfades it into the credits music on reveal.
                     self.game.transitions.fade_to_black(
                         float(transition.get("duration", 1.15)),
                         on_complete=self._begin_black_hold,

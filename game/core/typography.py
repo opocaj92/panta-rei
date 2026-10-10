@@ -17,7 +17,8 @@ class Typography:
         spec = self.styles[style]
         size = max(1, round(spec["size"] * float(scale)))
         italic = bool(spec.get("italic", False))
-        key = (style, size, italic)
+        bold = bool(spec.get("bold", False))
+        key = (style, size, bold, italic)
         if key not in self._fonts:
             # `path` is an asset-relative font file, never an opaque font key.
             # Missing optional fonts intentionally use Pygame's bundled default
@@ -26,6 +27,9 @@ class Typography:
             if relative_path and not (ASSETS_DIR / relative_path).is_file():
                 raise FileNotFoundError(f"Typography style {style!r} references missing font: {ASSETS_DIR / relative_path}")
             font = self.assets.font(f"typography.{style}", relative_path=relative_path or f"__default__.{style}", size=size)
+            # VT323 ships only a regular face; SDL_ttf synthesizes bold and
+            # italic styles for speaker names and thoughts respectively.
+            font.set_bold(bold)
             font.set_italic(italic)
             self._fonts[key] = font
         return self._fonts[key]

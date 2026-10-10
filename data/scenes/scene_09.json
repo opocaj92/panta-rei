@@ -6,7 +6,7 @@
     "final_separation": 118.0,
     "join_threshold": 2.0,
     "grab_radius": 65.0,
-    "drag_sensitivity": 1.0,
+    "drag_sensitivity": 0.7,
     "joined_lock_duration": 2.0
   },
   "next_scene": "scene_10",

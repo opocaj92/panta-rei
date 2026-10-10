@@ -1,0 +1,51 @@
+{
+  "volumes": {
+    "music": 0.65,
+    "ambience": 0.7,
+    "effects": 0.8
+  },
+  "music": {
+    "scene04_05_piano_theme": "audio/music/scene04_05_piano_theme_loop.wav",
+    "scene09_suspended_atmosphere": "audio/music/scene09_suspended_atmosphere_loop.wav",
+    "scene12_final_credits": "audio/music/scene12_final_credits_theme_short.wav"
+  },
+  "ambience": {
+    "scene01_night_wind": "audio/ambience/scene01_night_wind_loop.wav",
+    "scene02_river": "audio/ambience/scene02_river_flow_loop.wav",
+    "scene02_vegetation": "audio/ambience/scene02_vegetation_rustle_loop.wav",
+    "scene02_phone": "audio/ambience/scene02_smartphone_videos_loop.wav",
+    "scene07_phone_fixed_video": "audio/ambience/scene07_phone_fixed_video_loop.wav"
+  },
+  "effects": {
+    "scene01_piano_sustain": "audio/effects/scene01_piano_sustain.wav",
+    "scene01_piano_motif": "audio/effects/scene01_piano_motif.wav",
+    "scene02_clothing_rustle_01": "audio/effects/scene02_clothing_rustle_01.wav",
+    "scene02_clothing_rustle_02": "audio/effects/scene02_clothing_rustle_02.wav",
+    "scene02_clothing_rustle_03": "audio/effects/scene02_clothing_rustle_03.wav",
+    "scene05_piano_resolution": "audio/effects/scene05_piano_resolution_short.wav",
+    "scene05_wet_brushstroke": "audio/effects/scene05_wet_brushstroke_loop.wav",
+    "scene08_grass_swish": "audio/effects/scene08_grass_swish_03.wav",
+    "scene09_meeting_harmony": "audio/effects/scene09_meeting_piano_harmony.wav",
+    "scene09_kiss_shimmer": "audio/effects/scene09_kiss_shimmer_short.wav",
+    "scene10_harmonic_crescendo": "audio/effects/scene10_harmonic_crescendo_loop.wav",
+    "scene10_arrival_resolution": "audio/effects/scene10_arrival_piano_resolution.wav"
+  },
+  "scenes": {
+    "scene_01": {
+      "ambience": "scene01_night_wind",
+      "ambience_volume": 0.5,
+      "fade_ms": 1000
+    },
+    "scene_02": {},
+    "scene_03": {},
+    "scene_04": {},
+    "scene_05": {},
+    "scene_06": {},
+    "scene_07": {},
+    "scene_08": {},
+    "scene_09": {},
+    "scene_10": {},
+    "scene_11": {},
+    "scene_12": {}
+  }
+}

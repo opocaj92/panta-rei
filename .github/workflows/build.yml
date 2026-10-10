@@ -25,7 +25,7 @@ jobs:
 
       - name: Build Windows executable
         run: |
-          python -m PyInstaller --noconfirm --clean --windowed --name "Panta Rei" --add-data "assets:assets" --add-data "data:data" main.py
+          python -m PyInstaller --noconfirm --clean --windowed --name "Panta Rei" --icon "assets/icons/panta_rei.ico" --add-data "assets:assets" --add-data "data:data" main.py
 
       - name: Upload Windows build
         uses: actions/upload-artifact@v4
@@ -56,8 +56,67 @@ jobs:
         run: |
           python -m PyInstaller --noconfirm --clean --name "Panta Rei" --add-data "assets:assets" --add-data "data:data" main.py
 
+      - name: Create Linux launcher
+        run: |
+          cat > "dist/Panta Rei/Panta Rei.desktop" <<'EOF'
+          [Desktop Entry]
+          Version=1.0
+          Type=Application
+          Name=Panta Rei
+          Comment=A narrative pixel-art game
+          Exec=sh -c 'cd "$(dirname "$1")" && exec "./Panta Rei"' sh %k
+          Icon=panta_rei
+          Terminal=false
+          Categories=Game;
+          EOF
+
+          mkdir -p "dist/Panta Rei/icons"
+          cp assets/icons/panta_rei_512.png "dist/Panta Rei/icons/panta_rei.png"
+
       - name: Upload Linux build
         uses: actions/upload-artifact@v4
         with:
           name: Panta-Rei-Linux
           path: dist/Panta Rei/
+
+  build-macos:
+    name: Build macOS
+    runs-on: macos-15-intel
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build macOS application
+        run: |
+          python -m PyInstaller \
+            --noconfirm \
+            --clean \
+            --windowed \
+            --name "Panta Rei" \
+            --icon "assets/icons/panta_rei.icns" \
+            --add-data "assets:assets" \
+            --add-data "data:data" \
+            main.py
+
+      - name: Package macOS application
+        run: |
+          cd dist
+          zip -r -y Panta-Rei-macOS.zip "Panta Rei.app"
+
+      - name: Upload macOS build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Panta-Rei-macOS
+          path: dist/Panta-Rei-macOS.zip
