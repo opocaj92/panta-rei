@@ -21,7 +21,7 @@
   },
   "shared_presentation": "stella_pov",
   "touch_help": {
-    "it": "Trascina verso l’alto per avvicinarti a Marco.",
-    "en": "Drag upward to move closer to Marco."
+    "it": "Allarga due dita per avvicinarti.",
+    "en": "Pinch-out to move closer."
   }
 }

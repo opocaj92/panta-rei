@@ -14,11 +14,15 @@ class HandTracingSystem:
         self.fingertip = pygame.Vector2(184, 2)
         self.tracing = False
         self.points = []  # [Vector2, age]
+        self.stroke_ids = []  # Parallel stroke identifiers, one per point.
+        self.current_stroke_id = 0
 
     def enter(self, screen_size):
         self.hand_position.update(screen_size[0] * 0.62, screen_size[1] * 0.55)
         self.tracing = False
         self.points.clear()
+        self.stroke_ids.clear()
+        self.current_stroke_id = 0
         pygame.mouse.set_visible(False)
 
     def exit(self):
@@ -29,6 +33,7 @@ class HandTracingSystem:
             self.hand_position.update(event.pos)
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             self.tracing = True
+            self.current_stroke_id += 1
             self._append_point(event.pos)
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             self.tracing = False
@@ -37,20 +42,26 @@ class HandTracingSystem:
         pass  # Mouse position is updated by logical-coordinate MOUSEMOTION events.
         for point in self.points:
             point[1] += dt
-        self.points = [p for p in self.points if p[1] < self.trace_lifetime]
+        survivors = [(p, stroke_id) for p, stroke_id in zip(self.points, self.stroke_ids)
+                     if p[1] < self.trace_lifetime]
+        self.points = [p for p, _ in survivors]
+        self.stroke_ids = [stroke_id for _, stroke_id in survivors]
         if self.tracing:
             self._append_point(self.hand_position)
 
     def _append_point(self, position):
         pos = pygame.Vector2(position)
-        if self.points and pos.distance_to(self.points[-1][0]) < self.min_point_distance:
+        if (self.points and self.stroke_ids[-1] == self.current_stroke_id
+                and pos.distance_to(self.points[-1][0]) < self.min_point_distance):
             return
         self.points.append([pos, 0.0])
+        self.stroke_ids.append(self.current_stroke_id)
 
     def has_visible_stroke(self):
-        """True once at least one segment meets the trace renderer's criteria."""
+        """True once a continuous gesture contains a visible segment."""
         return any(
-            0 < self.points[i - 1][0].distance_to(self.points[i][0]) <= 34
+            self.stroke_ids[i - 1] == self.stroke_ids[i]
+            and self.points[i - 1][0].distance_to(self.points[i][0]) > 0
             for i in range(1, len(self.points))
         )
 
@@ -61,8 +72,9 @@ class HandTracingSystem:
         for i in range(1, len(self.points)):
             p0, age0 = self.points[i - 1]
             p1, age1 = self.points[i]
-            # Do not connect strokes across a large mouse jump.
-            if p0.distance_to(p1) > 34:
+            # Connect every pair within a continuous gesture, even if
+            # Android delivers widely spaced touch-motion events.
+            if self.stroke_ids[i - 1] != self.stroke_ids[i]:
                 continue
             age = max(age0, age1)
             alpha = max(0, int(180 * (1.0 - age / self.trace_lifetime)))

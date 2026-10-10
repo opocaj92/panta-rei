@@ -6,7 +6,7 @@ package.domain = org.pantarei
 source.dir = .
 source.include_exts = py,json,png,jpg,jpeg,webp,wav,ogg,mp3,ttf,otf
 source.exclude_dirs = tests,.github,__pycache__,.venv,venv,dist,build
-version = 0.8.5
+version = 0.1.0
 # Android compilation requires a compatible pygame recipe. See ANDROID_BUILD.md.
 requirements = hostpython3==3.10.12,python3==3.10.12,pygame,pyjnius
 orientation = landscape

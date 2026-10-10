@@ -44,6 +44,17 @@ class Scene08(Scene):
             self.game.audio.play_sfx("scene08_grass_swish", volume=0.35)
             self.drag_sound_played = True
 
+    def pinch_touch(self, distance_delta):
+        """Android pinch input, independent of the desktop mouse-drag path."""
+        before = self.approach_system.progress
+        self.approach_system.pinch(distance_delta, enabled=not self.transition_started)
+        if self.approach_system.progress > before and not self.drag_sound_played:
+            self.game.audio.play_sfx("scene08_grass_swish", volume=0.35)
+            self.drag_sound_played = True
+        elif distance_delta < 0:
+            # Allow a new swish on the next outward pinch.
+            self.drag_sound_played = False
+
     def update(self, dt):
         self.game.audio.update_ambience_layers(dt)
         self.elapsed += dt
