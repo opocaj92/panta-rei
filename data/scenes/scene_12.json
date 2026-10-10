@@ -17,7 +17,7 @@
     "en": [
       {
         "kind": "role",
-        "text": "CREATED BY"
+        "text": "STORY, GAME DESIGN & CREATIVE DIRECTOR"
       },
       {
         "kind": "name",
@@ -29,7 +29,15 @@
       },
       {
         "kind": "name",
-        "text": "Jacopo Castellini"
+        "text": "AI-assisted, directed by Jacopo Castellini"
+      },
+      {
+        "kind": "role",
+        "text": "PROGRAMMING & TECHNICAL DEVELOPMENT"
+      },
+      {
+        "kind": "name",
+        "text": "Jacopo Castellini, with ChatGPT"
       },
       {
         "kind": "role",
@@ -38,20 +46,12 @@
       {
         "kind": "name",
         "text": "Jacopo Castellini"
-      },
-      {
-        "kind": "role",
-        "text": "AI-ASSISTED DEVELOPMENT"
-      },
-      {
-        "kind": "name",
-        "text": "ChatGPT"
       }
     ],
     "it": [
       {
         "kind": "role",
-        "text": "CREATED BY"
+        "text": "STORY, GAME DESIGN & CREATIVE DIRECTOR"
       },
       {
         "kind": "name",
@@ -63,7 +63,15 @@
       },
       {
         "kind": "name",
-        "text": "Jacopo Castellini"
+        "text": "AI-assisted, directed by Jacopo Castellini"
+      },
+      {
+        "kind": "role",
+        "text": "PROGRAMMING & TECHNICAL DEVELOPMENT"
+      },
+      {
+        "kind": "name",
+        "text": "Jacopo Castellini, with ChatGPT"
       },
       {
         "kind": "role",
@@ -72,14 +80,6 @@
       {
         "kind": "name",
         "text": "Jacopo Castellini"
-      },
-      {
-        "kind": "role",
-        "text": "AI-ASSISTED DEVELOPMENT"
-      },
-      {
-        "kind": "name",
-        "text": "ChatGPT"
       }
     ]
   },
