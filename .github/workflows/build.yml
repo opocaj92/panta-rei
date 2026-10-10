@@ -202,8 +202,31 @@ jobs:
           test -d assets
           test -d data
       - name: Generate iOS Xcode project
+        env:
+          GH_API_TOKEN: ${{ github.token }}
         run: |
-          python -m pygame_ios . main.py 2.5.6
+          python - <<'PYTHON'
+          import os
+          import runpy
+          import sys
+          from urllib.parse import urlparse
+
+          import requests
+
+          original_request = requests.sessions.Session.request
+
+          def authenticated_request(self, method, url, **kwargs):
+              if urlparse(url).hostname == "api.github.com":
+                  headers = dict(kwargs.pop("headers", {}) or {})
+                  headers.setdefault("Authorization", f"Bearer {os.environ['GH_API_TOKEN']}")
+                  headers.setdefault("Accept", "application/vnd.github+json")
+                  kwargs["headers"] = headers
+              return original_request(self, method, url, **kwargs)
+
+          requests.sessions.Session.request = authenticated_request
+          sys.argv = ["pygame_ios", ".", "main.py", "2.5.6"]
+          runpy.run_module("pygame_ios", run_name="__main__")
+          PYTHON
       - name: Configure iOS icon and landscape orientation
         run: python scripts/configure_ios_project.py
       - name: Build unsigned iOS Simulator app
