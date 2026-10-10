@@ -51,7 +51,7 @@ class Scene04(Scene):
         self.game.dialogue.load("scene_04")
         # The river is already playing on Scene 02's layer; never restart it.
         fade_ms = round(float(self.config.get("transition_in", {}).get("duration", 0.0)) * 1000)
-        self.game.audio.set_ambience_layer_volume("river", 0.32)
+        self.game.audio.set_ambience_layer_volume("river", 0.18)
         self.game.audio.play_music("scene04_05_piano_theme", fade_ms=fade_ms, volume=0.52)
 
     def update(self, dt):

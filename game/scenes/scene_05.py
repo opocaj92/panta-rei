@@ -61,6 +61,8 @@ class Scene05(Scene):
         self.stroke_start_index = 0
         self.paint_idle_time = 0.0
         self.paint_active = False
+        # Keep Scene 04's river layer at its established level without restarting it.
+        self.game.audio.set_ambience_layer_volume("river", 0.18)
         # Scene 04's river keeps playing; at the scene boundary the piano
         # yields once to the resolution phrase, then resumes from its pause.
         self._start_resolution()

@@ -25,7 +25,7 @@ class Scene09(Scene):
         self.meeting_flash_elapsed = None
         self.meeting_flash_outline = None
         self.meeting_flash_size = None
-        self.music_gain = 0.36
+        self.music_gain = 0.32
 
     def help_needed(self):
         return self.phase in (self.APPROACHING, self.SEPARATING)
@@ -41,7 +41,7 @@ class Scene09(Scene):
         self.meeting_flash_outline = None
         self.meeting_flash_size = None
         self.silhouette_drag.stop()
-        self.music_gain = 0.36
+        self.music_gain = 0.32
         # Scene 08 fades the riverside ambience during its exit transition.
         # Scene 09 is an abstract interlude with its own continuous music.
         self.game.audio.play_music("scene09_suspended_atmosphere", fade_ms=900,
@@ -77,7 +77,7 @@ class Scene09(Scene):
                     self.separation = 0.0
                     self.phase = self.JOINED
                     self.joined_elapsed = 0.0
-                    self.game.audio.play_sfx("scene09_meeting_harmony", volume=0.70)
+                    self.game.audio.play_sfx("scene09_meeting_harmony", volume=0.60)
                     # Flash is triggered halfway through the joined pause.
                     self.meeting_flash_elapsed = None
                     self.meeting_flash_outline = None
@@ -100,7 +100,7 @@ class Scene09(Scene):
         # As the two figures approach, gently raise the atmospheric texture.
         start = max(1.0, float(self.interaction_cfg.get("start_separation", 118.0)))
         proximity = 1.0 - max(0.0, min(1.0, self.separation / start))
-        target_gain = 0.36 + 0.20 * proximity if self.phase in (self.APPROACHING, self.JOINED) else 0.32
+        target_gain = 0.32 + 0.18 * proximity if self.phase in (self.APPROACHING, self.JOINED) else 0.32
         self.music_gain += (target_gain - self.music_gain) * min(1.0, max(0.0, dt) * 2.4)
         if not self.transition_started:
             self.game.audio.play_music("scene09_suspended_atmosphere", volume=self.music_gain)
@@ -122,7 +122,7 @@ class Scene09(Scene):
                 # Start precisely when the joined pause crosses its midpoint.
                 self.meeting_flash_elapsed = self.joined_elapsed - midpoint
                 # Trigger on the same update tick as the first visible flash frame.
-                self.game.audio.play_sfx("scene09_kiss_shimmer", volume=0.68)
+                self.game.audio.play_sfx("scene09_kiss_shimmer", volume=0.32)
                 self.meeting_flash_outline = None
             if self.joined_elapsed >= joined_duration:
                 self.phase = self.SEPARATING

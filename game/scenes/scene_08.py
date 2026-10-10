@@ -41,7 +41,7 @@ class Scene08(Scene):
         # Trigger only once per gesture, and only if Stella actually moves closer.
         if (event.type == pygame.MOUSEMOTION and not self.drag_sound_played
                 and self.approach_system.progress > before):
-            self.game.audio.play_sfx("scene08_grass_swish", volume=0.45)
+            self.game.audio.play_sfx("scene08_grass_swish", volume=0.35)
             self.drag_sound_played = True
 
     def update(self, dt):

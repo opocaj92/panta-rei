@@ -35,7 +35,7 @@ class Scene12(Scene):
         reveal_ms = round(float(self.config.get('transition_in', {}).get('duration', 1.0)) * 1000)
         for name in Scene02.AUDIO_LAYERS:
             self.game.audio.set_ambience_layer_volume(name, 0.0, fade_ms=reveal_ms)
-        self.game.audio.play_music('scene12_final_credits', fade_ms=reveal_ms, restart=True)
+        self.game.audio.play_music('scene12_final_credits', fade_ms=reveal_ms, volume=0.55, restart=True)
 
     def handle_input(self, event):
         return

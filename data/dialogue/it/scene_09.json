@@ -4,25 +4,25 @@
       "speaker": "Marco",
       "type": "speech",
       "text": "Beh, ecco... Non saprei... In quel caso non dovremmo diventare tipo la stessa persona?",
-      "speed": 35
+      "speed": 40
     },
     {
       "speaker": "",
       "type": "thought",
       "text": "quanto sarebbe romantico...",
-      "speed": 30
+      "speed": 40
     },
     {
       "speaker": "Stella",
       "type": "speech",
       "text": "Ma che stessa persona? Dio che stupido... Lo sanno anche i bambini che in un bacio le anime si uniscono per un secondo, prima di separarsi di nuovo e tornare separate",
-      "speed": 35
+      "speed": 40
     },
     {
       "speaker": "",
       "type": "thought",
       "text": "che romantico!",
-      "speed": 30
+      "speed": 40
     }
   ]
 }

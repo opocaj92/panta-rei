@@ -17,11 +17,11 @@ class Scene02(Scene):
         "phone": "scene02_phone",
     }
     VIEW_MIX = {
-        "river": {"river": 0.32, "wind": 0.22, "vegetation": 0.08, "phone": 0.08},
-        "stella": {"river": 0.12, "wind": 0.18, "vegetation": 0.05, "phone": 0.30},
-        "grass": {"river": 0.08, "wind": 0.32, "vegetation": 0.80, "phone": 0.02},
-        "city": {"river": 0.09, "wind": 0.35, "vegetation": 0.10, "phone": 0.02},
-        "sky": {"river": 0.07, "wind": 0.48, "vegetation": 0.05, "phone": 0.0},
+        "river": {"river": 0.18, "wind": 0.07, "vegetation": 0.07, "phone": 0.09},
+        "stella": {"river": 0.09, "wind": 0.09, "vegetation": 0.05, "phone": 0.11},
+        "grass": {"river": 0.05, "wind": 0.17, "vegetation": 0.42, "phone": 0.02},
+        "city": {"river": 0.05, "wind": 0.30, "vegetation": 0.12, "phone": 0.02},
+        "sky": {"river": 0.05, "wind": 0.45, "vegetation": 0.05, "phone": 0.00},
     }
 
     """
@@ -149,7 +149,7 @@ class Scene02(Scene):
         if self.game.dialogue.finished and not self.transition_started:
             fade_ms = round(float(self.config.get("transition_out", {}).get("duration", 0.0)) * 1000)
             for name in self.AUDIO_LAYERS:
-                target = 0.32 if name == "river" else 0.0
+                target = 0.18 if name == "river" else 0.0
                 self.game.audio.set_ambience_layer_volume(name, target, fade_ms=fade_ms)
             self.request_transition("scene_03")
 

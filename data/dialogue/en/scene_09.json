@@ -4,25 +4,25 @@
       "speaker": "Marco",
       "type": "speech",
       "text": "Well, uh... I don't know... Wouldn't we have to become, like, the same person in that case?",
-      "speed": 35
+      "speed": 40
     },
     {
       "speaker": "",
       "type": "thought",
       "text": "how romantic would that be...",
-      "speed": 30
+      "speed": 40
     },
     {
       "speaker": "Stella",
       "type": "speech",
       "text": "The same person? God, you're stupid... Even kids know that when you kiss, your souls become one for a second, before separating again and going back to being two separate souls",
-      "speed": 35
+      "speed": 40
     },
     {
       "speaker": "",
       "type": "thought",
       "text": "so romantic!",
-      "speed": 30
+      "speed": 40
     }
   ]
 }

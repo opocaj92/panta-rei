@@ -1,14 +1,17 @@
 import pygame
 
 from game.core.scene import Scene
+from game.scenes.scene_02 import Scene02
 from game.rendering.stella_pov_renderer import StellaPOVRenderer
 
 
 class Scene07(Scene):
     """Stella's POV: look up from her phone to Marco, then hear her reply."""
 
-    PHONE_MIX = {"river": 0.12, "wind": 0.18, "vegetation": 0.05, "phone": 0.65}
-    RIVER_MIX = {"river": 0.32, "wind": 0.22, "vegetation": 0.08, "phone": 0.08}
+    # Match Scene 02's Stella and river views, except for the louder
+    # phone recording while Stella is looking directly at her screen.
+    PHONE_MIX = {**Scene02.VIEW_MIX["stella"], "phone": 0.38}
+    RIVER_MIX = Scene02.VIEW_MIX["river"]
 
     def _set_mix(self, mix, fade_ms):
         for name, gain in mix.items():

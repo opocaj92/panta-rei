@@ -6,11 +6,11 @@
   "text_max_width": 456,
   "next_scene": "scene_07",
   "transition_in": {
-    "type": "none",
-    "duration": 0.0
+    "type": "fade_from_black",
+    "duration": 1.5
   },
   "transition_out": {
-    "type": "none",
-    "duration": 0.0
+    "type": "fade_to_black",
+    "duration": 1.5
   }
 }

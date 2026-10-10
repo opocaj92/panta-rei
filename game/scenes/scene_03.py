@@ -11,7 +11,7 @@ class Scene03(BlackScreenDialogueScene):
     def enter(self):
         super().enter()
         # Keep the same river playback from Scene 02; all other layers fade away.
-        self.game.audio.set_ambience_layer_volume("river", 0.32)
+        self.game.audio.set_ambience_layer_volume("river", 0.18)
         for name in ("wind", "vegetation", "phone"):
             self.game.audio.set_ambience_layer_volume(name, 0.0, fade_ms=250)
         self.elapsed = 0.0

@@ -6,8 +6,8 @@
     "duration": 0.0
   },
   "transition_out": {
-    "type": "eye_blink",
-    "duration": 1.2
+    "type": "fade_to_black",
+    "duration": 1.5
   },
   "world": "river_estuary",
   "camera": [
@@ -19,7 +19,7 @@
     "trace_width": 6,
     "min_point_distance": 5.0
   },
-  "post_dialogue_delay": 1.5,
+  "post_dialogue_delay": 1.0,
   "next_scene": "scene_06",
   "help": {
     "it": "Tieni premuto il tasto sinistro del mouse e trascina per tracciare.",

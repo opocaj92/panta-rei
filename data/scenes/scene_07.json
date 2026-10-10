@@ -9,7 +9,7 @@
   "next_scene": "scene_08",
   "transition_in": {
     "type": "fade_from_black",
-    "duration": 1.0
+    "duration": 1.5
   },
   "transition_out": {
     "type": "none",
