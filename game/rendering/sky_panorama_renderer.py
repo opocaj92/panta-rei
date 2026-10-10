@@ -13,12 +13,14 @@ class SkyPanoramaRenderer(SharedStellaSky):
         self.facing_frames = self.stella_turn_frames[2:6]  # authored 03..06, inclusive
         self.elapsed = 0.0
         self.meteors_enabled = False
+        self.meteor_triggered = False
         self.reset()
 
     def reset(self):
         self.reset_shared()
         self.elapsed = 0.0
         self.meteors_enabled = False
+        self.meteor_triggered = False
 
     def update(self, dt, sky_complete=False):
         self.elapsed += dt
@@ -28,8 +30,10 @@ class SkyPanoramaRenderer(SharedStellaSky):
         if sky_complete:
             self.meteors_enabled = True
         # Do not decrement the meteor spawn timer until the pan has completed.
-        if self.meteors_enabled:
+        if self.meteors_enabled and (not self.meteor_triggered or self.shooting_star_active):
             self._update_shooting_star(dt, True)
+            if self.shooting_star_active:
+                self.meteor_triggered = True
 
     def render(self, screen, camera_y):
         world = self.world_background.copy()

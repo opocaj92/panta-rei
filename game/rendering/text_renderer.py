@@ -90,7 +90,25 @@ class TextRenderer:
         box.fill((0, 0, 0, 190))
         screen.blit(box, box_rect.topleft)
         if speaker:
-            self._text(screen, self.speaker_font, speaker, (225, 225, 225),
+            # A softly translucent nameplate identifies the speaker without
+            # changing the dialogue box layout or the text's original position.
+            speaker_colors = {
+                "marco": (115, 190, 235, 155),   # light blue
+                "stella": (210, 125, 195, 155),  # pink-violet
+            }
+            color = speaker_colors.get(speaker.casefold())
+            if color is not None:
+                label_width, label_height = self.speaker_font.size(speaker)
+                name_padding_x, name_padding_y = 6, 2
+                plate = pygame.Surface(
+                    (label_width + 2 * name_padding_x,
+                     label_height + 2 * name_padding_y),
+                    pygame.SRCALPHA,
+                )
+                plate.fill(color)
+                screen.blit(plate, (box_rect.x + padding_x - name_padding_x,
+                                    box_rect.y + top_padding - name_padding_y))
+            self._text(screen, self.speaker_font, speaker, (245, 245, 245),
                        box_rect.x + padding_x, box_rect.y + top_padding)
 
         # Very long passages should still stay within the available canvas.

@@ -7,7 +7,7 @@ class Scene:
     receive hints after the configured idle period.
     """
 
-    HELP_DELAY = 8.0
+    HELP_DELAY = 5.0
 
     def __init__(self, game, config):
         self.game = game
