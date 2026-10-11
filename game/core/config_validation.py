@@ -162,9 +162,27 @@ def validate_scene_config(name, config):
         _require(config, ("world", "next_scene"), name)
         _positive(config.get("post_dialogue_delay", 0.0), "scene_05.post_dialogue_delay", allow_zero=True)
 
+    elif name == "scene_07":
+        camera = config.get("camera", {})
+        for key in ("phone_y", "marco_y"):
+            if key in camera:
+                value = _finite_number(camera[key], f"scene_07.camera.{key}")
+                if not 0 <= value <= 360:
+                    raise ValueError(f"scene_07.camera.{key} must be between 0 and 360")
+        if "pan_duration" in camera:
+            _positive(camera["pan_duration"], "scene_07.camera.pan_duration")
+
     elif name == "scene_08":
         _require(config, ("approach", "next_scene", "help"), name)
         approach = config["approach"]
+        if "zoom_focus" in approach:
+            focus = approach["zoom_focus"]
+            if not isinstance(focus, (list, tuple)) or len(focus) != 2:
+                raise ValueError("scene_08.approach.zoom_focus must be [x, y]")
+            for axis, value, upper in zip(("x", "y"), focus, (640, 720)):
+                coordinate = _finite_number(value, f"scene_08.approach.zoom_focus.{axis}")
+                if not 0 <= coordinate <= upper:
+                    raise ValueError(f"scene_08.approach.zoom_focus.{axis} must be between 0 and {upper}")
         _require(approach, ("drag_sensitivity", "max_safe_zoom"), f"{name}.approach")
         _positive(approach["drag_sensitivity"], "scene_08.approach.drag_sensitivity")
         _positive(approach.get("smoothing_time", 0.22), "scene_08.approach.smoothing_time")

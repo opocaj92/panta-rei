@@ -1,0 +1,19 @@
+{
+  "lines": [
+    {
+      "type": "dialogue",
+      "text": "Scorri con il dito per muoverti o guardarti intorno.",
+      "speed": 40
+    },
+    {
+      "type": "dialogue",
+      "text": "Tocca per selezionare o interagire. Trascina il dito per spostare oggetti o disegnare. Usa due dita per lo zoom quando richiesto.",
+      "speed": 40
+    },
+    {
+      "type": "dialogue",
+      "text": "Tocca per mostrare e avanzare i dialoghi. Tocca ancora dopo l’ultimo messaggio per tornare al menu.",
+      "speed": 40
+    }
+  ]
+}

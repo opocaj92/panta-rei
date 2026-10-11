@@ -44,5 +44,7 @@
     "it": "Scorri per spostare lo sguardo.",
     "en": "Swipe to move your gaze."
   },
-  "rustle_volume": 0.36
+  "rustle_volume": 0.36,
+  "view_change_cooldown": 0.5,
+  "help_delay": 5.0
 }

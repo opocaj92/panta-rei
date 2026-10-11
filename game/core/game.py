@@ -71,12 +71,18 @@ class Game:
                 max(0, min(WINDOW_HEIGHT - 1, round(y))))
 
     def update_cursor_visibility(self):
-        """Show the system pointer only for scenes requiring direct mouse dragging.
+        """Show the desktop pointer for the main menu and drag interactions.
 
         Scene 05 uses its own animated pointing hand instead of the OS cursor.
         """
         pygame.mouse.set_visible(
-            not self.touch_enabled and self.scenes.current_name in {"scene_08", "scene_09", "scene_10"}
+            not self.touch_enabled and (
+                self.scenes.current_name in {"scene_08", "scene_09", "scene_10"}
+                or (
+                    self.scenes.current_name == "scene_01"
+                    and getattr(self.scenes.current, "state", None) == "menu"
+                )
+            )
         )
 
     def _present_frame(self):
@@ -96,6 +102,21 @@ class Game:
                               area=pygame.Rect(0, 0, self.viewport.width, self.viewport.height))
             self.text_renderer.overlay = None
         pygame.display.flip()
+
+    def restart_from_credits(self, *, fade_in_duration=1.5):
+        """Start a genuinely new playthrough after the final black hold.
+
+        Each scene is constructed on activation, so discarding shared transient
+        input/dialogue and renderer state prevents the previous run leaking in.
+        Keep the outgoing fade opaque until the new scene is ready to render.
+        """
+        self.touch.cancel()
+        self.input.keys_pressed.clear()
+        self.input.keys_released.clear()
+        self.dialogue = DialogueManager(language=self.language)
+        self.preloaded_scene10_renderer = None
+        self.scenes._activate_scene("scene_01", start_transition_in=False)
+        self.transitions.fade_from_black(fade_in_duration)
 
     def run(self, start_scene="scene_01", start_state=None):
         self.scenes.change_scene(start_scene, state=start_state)
@@ -159,7 +180,7 @@ class Game:
                     # lines a scene has not yet made available to the player.
                     if (
                         event.type == pygame.KEYDOWN
-                        and event.key in (pygame.K_RETURN, pygame.K_BACKSPACE)
+                        and event.key in (pygame.K_RETURN, pygame.K_SPACE)
                     ):
                         scene = self.scenes.current
                         if scene is not None and scene.allows_dialogue_advance():

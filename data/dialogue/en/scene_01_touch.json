@@ -1,0 +1,19 @@
+{
+  "lines": [
+    {
+      "type": "dialogue",
+      "text": "Swipe to move or look around.",
+      "speed": 40
+    },
+    {
+      "type": "dialogue",
+      "text": "Tap to select or interact. Touch and drag to move objects or draw. Use two fingers to zoom when prompted.",
+      "speed": 40
+    },
+    {
+      "type": "dialogue",
+      "text": "Tap to reveal and advance dialogue. Tap again after the last message to return to the menu.",
+      "speed": 40
+    }
+  ]
+}

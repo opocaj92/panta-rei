@@ -20,6 +20,8 @@ class Scene08(Scene):
             smoothing_time=approach.get("smoothing_time", 0.22),
         )
         self.min_required_approach = float(approach.get("min_required_approach", 0.05))
+        # World-space focal point; tune in scene_08.json to align with Marco’s face.
+        self.zoom_focus = tuple(approach.get("zoom_focus", (140, 275)))
         self.grass_volume = float(config.get("grass_volume", 0.35))
         self.completion_timer = CompletionTimer()
         self.drag_sound_played = False
@@ -84,7 +86,7 @@ class Scene08(Scene):
         max_zoom = float(approach_cfg.get("max_safe_zoom", 1.38))
         zoom = 1.0 + (max_zoom - 1.0) * self.approach_system.display_progress
         self.renderer.render(screen, self.camera_y, self.elapsed, zoom=zoom,
-                             animate_phone=False, focus=(110, 285))
+                             animate_phone=False, focus=self.zoom_focus)
 
         self.render_dialogue_or_thought(
             screen, dialogue_rect=pygame.Rect(51, 273, screen.get_width() - 102, 66)

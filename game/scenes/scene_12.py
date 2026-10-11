@@ -21,6 +21,7 @@ class Scene12(Scene):
         self.scroll_y = 0.0
         self.fade_started = False
         self.terminal_black = False
+        self.black_elapsed = 0.0
         self._build_credits()
 
     def enter(self):
@@ -30,6 +31,7 @@ class Scene12(Scene):
         self.scroll_y = float(self.credits_renderer.glass.height + 8)
         self.fade_started = False
         self.terminal_black = False
+        self.black_elapsed = 0.0
         self._build_credits()
         # Scene 11's sky ambience continues through its full black hold.
         # Begin the handoff only as the credits fade into view.
@@ -52,6 +54,14 @@ class Scene12(Scene):
         self.elapsed += dt
         self.game.audio.update_ambience_layers(dt)
         if self.terminal_black:
+            # The outgoing fade is fully opaque when _finish runs. Hold that
+            # black frame before constructing a fresh opening scene.
+            self.black_elapsed += max(0.0, dt)
+            restart = self.config.get('restart', {})
+            if self.black_elapsed >= float(restart.get('black_screen_duration', 4.0)):
+                self.game.restart_from_credits(
+                    fade_in_duration=float(restart.get('fade_in_duration', 1.5))
+                )
             return
         self.phase_time += dt
         if self.phase == 'title':
@@ -79,6 +89,7 @@ class Scene12(Scene):
 
     def _finish(self):
         self.terminal_black = True
+        self.black_elapsed = 0.0
         # The permanent black screen must also be completely silent.
         self.game.audio.stop_music()
         self.game.audio.stop_ambience_layers()

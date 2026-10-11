@@ -109,8 +109,16 @@ class Scene05(Scene):
                 if not self.transition_started:
                     self.game.audio.resume_music()
 
-        if self.game.dialogue.finished and self.has_drawn_stroke and not self.transition_started:
-            elapsed = self.completion_timer.update(dt, active=True)
+        # A completed gesture is required: never interrupt a held mouse button
+        # or finger, even if the dialogue and post-dialogue delay are over.
+        ready = (
+            self.game.dialogue.finished
+            and self.has_drawn_stroke
+            and not self.hand.tracing
+            and not self.transition_started
+        )
+        elapsed = self.completion_timer.update(dt, active=ready)
+        if ready:
             delay = float(self.config.get("post_dialogue_delay", 1.5))
             if elapsed >= delay:
                 # Fade the soundscape as the eye blink closes, not on Scene 06 entry.

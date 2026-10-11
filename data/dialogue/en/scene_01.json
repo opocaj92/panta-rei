@@ -1,3 +1,19 @@
 {
-  "lines": []
+  "lines": [
+    {
+      "type": "dialogue",
+      "text": "Move or look around with the arrow keys or WASD.",
+      "speed": 40
+    },
+    {
+      "type": "dialogue",
+      "text": "Left-click to select or interact. Hold and move the mouse to drag or draw.",
+      "speed": 40
+    },
+    {
+      "type": "dialogue",
+      "text": "Press Enter or Space to reveal and advance dialogue. Press again after the last message to return to the menu.",
+      "speed": 40
+    }
+  ]
 }

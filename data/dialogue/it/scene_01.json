@@ -1,3 +1,19 @@
 {
-  "lines": []
+  "lines": [
+    {
+      "type": "dialogue",
+      "text": "Usa le frecce o WASD per muoverti e guardarti intorno.",
+      "speed": 40
+    },
+    {
+      "type": "dialogue",
+      "text": "Clicca con il tasto sinistro per selezionare o interagire. Tienilo premuto e muovi il mouse per trascinare o disegnare.",
+      "speed": 40
+    },
+    {
+      "type": "dialogue",
+      "text": "Premi Invio o Spazio per mostrare e avanzare i dialoghi. Dopo l’ultimo messaggio, premi ancora per tornare al menu.",
+      "speed": 40
+    }
+  ]
 }

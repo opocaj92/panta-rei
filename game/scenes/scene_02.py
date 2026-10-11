@@ -43,6 +43,8 @@ class Scene02(Scene):
         self.progress_complete = False
         self.dialogue_delay = 0.0
         self.dialogue_started = False
+        self.view_change_cooldown = float(config.get("view_change_cooldown", 0.5))
+        self.view_change_remaining = 0.0
 
     def allows_dialogue_advance(self):
         return self.progress_complete and self.dialogue_started and not self.transition_started
@@ -51,6 +53,7 @@ class Scene02(Scene):
         return not self.progress_complete
 
     def enter(self):
+        self.view_change_remaining = 0.0
         self.renderer.reset()
         self.game.dialogue.load("scene_02")
         # The opening wind stays audible until this scene is activated.
@@ -60,7 +63,8 @@ class Scene02(Scene):
         self._set_view_mix(fade_ms=900)
 
     def handle_input(self, event):
-        if self.progress_complete or event.type != pygame.KEYDOWN:
+        if (self.progress_complete or event.type != pygame.KEYDOWN
+                or self.view_change_remaining > 0.0):
             return
 
         # While looking at the sky, only Down/S can return to the
@@ -74,6 +78,11 @@ class Scene02(Scene):
         if requested_view is not None:
             if requested_view != self.current_view:
                 self.current_view = requested_view
+                # Help is specific to the current view: hide it immediately
+                # and require a fresh uninterrupted wait in the new view.
+                self.reset_help()
+                # Hold each newly entered view for the configured minimum time.
+                self.view_change_remaining = self.view_change_cooldown
                 self.visited_views.add(requested_view)
                 self.game.audio.play_sfx(random.choice(self.RUSTLE_SOUNDS), volume=self.rustle_volume)
                 self._set_view_mix(fade_ms=800)
@@ -96,6 +105,7 @@ class Scene02(Scene):
         pass
 
     def update(self, dt):
+        self.view_change_remaining = max(0.0, self.view_change_remaining - max(0.0, dt))
         self.game.audio.update_ambience_layers(dt)
         # The renderer receives the current presentation view so random visual
         # events can start only when they are actually observable.

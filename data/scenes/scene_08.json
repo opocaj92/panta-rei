@@ -5,7 +5,11 @@
     "drag_sensitivity": 0.0028,
     "max_safe_zoom": 1.38,
     "smoothing_time": 0.22,
-    "min_required_approach": 0.05
+    "min_required_approach": 0.05,
+    "zoom_focus": [
+      140,
+      275
+    ]
   },
   "post_dialogue_delay": 1.0,
   "next_scene": "scene_09",

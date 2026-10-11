@@ -15,5 +15,30 @@
     "type": "fade_to_black",
     "duration": 1.5
   },
-  "auto_delay": 7.0
+  "menu": {
+    "buttons": {
+      "start": [
+        225,
+        225,
+        190,
+        34
+      ],
+      "commands": [
+        225,
+        266,
+        190,
+        34
+      ]
+    },
+    "labels": {
+      "en": {
+        "start": "Start Game",
+        "commands": "Show Commands"
+      },
+      "it": {
+        "start": "Inizia il gioco",
+        "commands": "Mostra i comandi"
+      }
+    }
+  }
 }
