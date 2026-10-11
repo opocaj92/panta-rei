@@ -30,17 +30,15 @@ class Scene05(Scene):
         self.hand = HandTracingSystem(config.get("tracing", {}), game.assets)
         self.flow_time = 0.0
         self.completion_timer = CompletionTimer()
-        self.has_traced_line = False
         self.has_drawn_stroke = False
         self.resolution_started = False
         self.resolution_finished = False
-        self.stroke_start_index = 0
         self.paint_idle_time = 0.0
         self.paint_active = False
 
     def help_needed(self):
         # A visible stroke teaches the mechanic; never repeat the hint.
-        return not self.has_drawn_stroke and not self.transition_started and not self.game.dialogue.finished
+        return not self.has_drawn_stroke and not self.transition_started
 
     def enter(self):
         # Scene 04 passes its exact final camera position so the scene change
@@ -54,11 +52,9 @@ class Scene05(Scene):
 
         self.game.dialogue.load("scene_05")
         self.hand.enter(self.game.screen.get_size())
-        self.has_traced_line = False
         self.has_drawn_stroke = False
         self.resolution_started = False
         self.resolution_finished = False
-        self.stroke_start_index = 0
         self.paint_idle_time = 0.0
         self.paint_active = False
         # Keep Scene 04's river layer at its established level without restarting it.
@@ -74,9 +70,6 @@ class Scene05(Scene):
     def handle_input(self, event):
         if self.transition_started:
             return
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            # Check only the current continuous gesture, not old fading strokes.
-            self.stroke_start_index = len(self.hand.points)
         if event.type == pygame.MOUSEMOTION and self.hand.tracing:
             # Only actual drawn movement makes the brush audible.
             previous = self.hand.hand_position
@@ -97,25 +90,6 @@ class Scene05(Scene):
             self.game.audio.fade_sfx("scene05_wet_brushstroke", fade_ms=120)
             self.paint_active = False
 
-    def _check_river_to_sea_connection(self):
-        if self.has_traced_line:
-            return
-        points = [point for point, _age in self.hand.points[self.stroke_start_index:]]
-        if len(points) < 2:
-            return
-        # The final authored river point is the mouth. Require the gesture to
-        # begin near it and travel outward into the sea, rather than merely
-        # drawing any visible line elsewhere on the screen.
-        mouth = pygame.Vector2(self.river_points[-1]) - self.camera
-        start = points[0]
-        end = points[-1]
-        if (start.distance_to(mouth) <= 115
-                and end.x >= mouth.x + 48
-                and abs(end.y - mouth.y) <= 125
-                and end.distance_to(start) >= 55):
-            self.has_traced_line = True
-            # The resolution has already played at the Scene 04/05 boundary.
-
     def update(self, dt):
         self.game.audio.update_ambience_layers(dt)
         self.flow_time += dt
@@ -124,8 +98,7 @@ class Scene05(Scene):
             self.paint_idle_time += dt
             if not self.hand.tracing or self.paint_idle_time > 0.16:
                 self._stop_paint_sound()
-        # Dismiss the instruction after any visible drawing, even when the
-        # gesture does not satisfy the river-to-sea connection condition.
+        # Any genuine drawn segment satisfies the interaction requirement.
         if self.hand.has_visible_stroke():
             self.has_drawn_stroke = True
 
@@ -136,7 +109,7 @@ class Scene05(Scene):
                 if not self.transition_started:
                     self.game.audio.resume_music()
 
-        if self.game.dialogue.finished and not self.transition_started:
+        if self.game.dialogue.finished and self.has_drawn_stroke and not self.transition_started:
             elapsed = self.completion_timer.update(dt, active=True)
             delay = float(self.config.get("post_dialogue_delay", 1.5))
             if elapsed >= delay:

@@ -23,5 +23,6 @@
   "touch_help": {
     "it": "Scorri verso l’alto per alzare lo sguardo.",
     "en": "Swipe up to look up."
-  }
+  },
+  "phone_volume": 0.38
 }

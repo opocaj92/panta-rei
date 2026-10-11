@@ -16,6 +16,7 @@ class HandTracingSystem:
         self.points = []  # [Vector2, age]
         self.stroke_ids = []  # Parallel stroke identifiers, one per point.
         self.current_stroke_id = 0
+        self.stroke_anchor = None
 
     def enter(self, screen_size):
         self.hand_position.update(screen_size[0] * 0.62, screen_size[1] * 0.55)
@@ -23,6 +24,7 @@ class HandTracingSystem:
         self.points.clear()
         self.stroke_ids.clear()
         self.current_stroke_id = 0
+        self.stroke_anchor = None
         pygame.mouse.set_visible(False)
 
     def exit(self):
@@ -31,23 +33,43 @@ class HandTracingSystem:
     def handle_event(self, event):
         if event.type == pygame.MOUSEMOTION:
             self.hand_position.update(event.pos)
+            if self.tracing:
+                self._record_motion(event.pos)
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            self.hand_position.update(event.pos)
             self.tracing = True
             self.current_stroke_id += 1
-            self._append_point(event.pos)
+            # Do not draw a dot on touch-down. Retain the actual touch position
+            # as the anchor for the first movement event.
+            self.stroke_anchor = pygame.Vector2(event.pos)
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            self.hand_position.update(event.pos)
+            if self.tracing:
+                self._record_motion(event.pos)
             self.tracing = False
+            self.stroke_anchor = None
+
+    def _record_motion(self, position):
+        pos = pygame.Vector2(position)
+        if self.stroke_anchor is None:
+            return
+        # Ignore stationary touches and tiny sensor jitter. The first real
+        # movement creates the anchor and endpoint together, as one stroke.
+        if not self.points or self.stroke_ids[-1] != self.current_stroke_id:
+            if pos.distance_to(self.stroke_anchor) < self.min_point_distance:
+                return
+            self._append_point(self.stroke_anchor)
+        self._append_point(pos)
 
     def update(self, dt):
-        pass  # Mouse position is updated by logical-coordinate MOUSEMOTION events.
+        # Record positions at input-event frequency, not once per rendered frame:
+        # otherwise intermediate Android touch samples are silently discarded.
         for point in self.points:
             point[1] += dt
         survivors = [(p, stroke_id) for p, stroke_id in zip(self.points, self.stroke_ids)
                      if p[1] < self.trace_lifetime]
         self.points = [p for p, _ in survivors]
         self.stroke_ids = [stroke_id for _, stroke_id in survivors]
-        if self.tracing:
-            self._append_point(self.hand_position)
 
     def _append_point(self, position):
         pos = pygame.Vector2(position)

@@ -27,10 +27,9 @@ class ApproachSystem:
                 self.progress = min(1.0, self.progress + dy * self.sensitivity)
 
     def pinch(self, distance_delta, enabled=True):
-        """Adjust target zoom from the change in two-finger separation."""
-        if enabled:
-            self.progress = max(0.0, min(1.0,
-                self.progress + distance_delta * self.sensitivity))
+        """Pinching outward zooms in; pinching inward never zooms out."""
+        if enabled and distance_delta > 0:
+            self.progress = min(1.0, self.progress + distance_delta * self.sensitivity)
 
     def update(self, dt):
         blend = 1.0 - pow(0.001, max(0.0, dt) / self.smoothing_time)

@@ -10,18 +10,8 @@
     "type": "fade_to_black",
     "duration": 1.5
   },
-  "dialogue_start_delay": 0.8,
+  "dialogue_start_delay": 2.0,
   "sky_view": "sky",
-  "attention_sequence": [
-    {
-      "view": "stella",
-      "duration": 2.0
-    },
-    {
-      "view": "river",
-      "duration": 2.0
-    }
-  ],
   "help": {
     "it": "Usa WASD o le frecce per spostare lo sguardo.",
     "en": "Use WASD or the arrow keys to move your gaze."
@@ -53,5 +43,6 @@
   "touch_help": {
     "it": "Scorri per spostare lo sguardo.",
     "en": "Swipe to move your gaze."
-  }
+  },
+  "rustle_volume": 0.36
 }

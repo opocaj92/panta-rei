@@ -25,5 +25,19 @@
   "touch_help": {
     "it": "Trascina una sagoma verso l’altra per avvicinarle. Poi trascinale per separarle.",
     "en": "Drag either silhouette inward to bring them closer. Then drag outward to separate them."
+  },
+  "music": {
+    "initial_volume": 0.32,
+    "progress_volume_increase": 0.18,
+    "smoothing_rate": 2.4,
+    "fade_in_ms": 900
+  },
+  "meeting_audio": {
+    "harmony_volume": 0.6,
+    "shimmer_volume": 0.32
+  },
+  "meeting_flash": {
+    "fade_in_duration": 0.15,
+    "fade_out_duration": 0.4
   }
 }

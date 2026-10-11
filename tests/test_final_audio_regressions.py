@@ -24,7 +24,7 @@ def test_scene10_merger_effects_are_one_shot_and_fade_on_exit():
     guards = [n for n in ast.walk(update) if isinstance(n, ast.If)]
     assert any('not self.arrival_played' in ast.unparse(n.test) for n in guards)
     text = source('game/scenes/scene_10.py')
-    for effect in ('scene09_kiss_shimmer', 'scene10_arrival_resolution'):
+    for effect in ('scene09_kiss_shimmer', 'scene09_meeting_harmony'):
         assert f"fade_sfx('{effect}'" in text
 
 

@@ -25,5 +25,10 @@
   "touch_help": {
     "it": "Trascina la punta del fiume verso il mare.",
     "en": "Drag the river tip toward the sea."
+  },
+  "music": {
+    "initial_volume": 0.32,
+    "progress_volume_increase": 0.18,
+    "smoothing_rate": 2.5
   }
 }

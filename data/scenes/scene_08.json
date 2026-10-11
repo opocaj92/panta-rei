@@ -3,7 +3,9 @@
   "type": "stella_optional_approach",
   "approach": {
     "drag_sensitivity": 0.0028,
-    "max_safe_zoom": 1.38
+    "max_safe_zoom": 1.38,
+    "smoothing_time": 0.22,
+    "min_required_approach": 0.05
   },
   "post_dialogue_delay": 1.0,
   "next_scene": "scene_09",
@@ -23,5 +25,6 @@
   "touch_help": {
     "it": "Allarga due dita per avvicinarti.",
     "en": "Pinch-out to move closer."
-  }
+  },
+  "grass_volume": 0.35
 }

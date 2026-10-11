@@ -180,7 +180,7 @@ jobs:
           if-no-files-found: ignore
 
   build-ios:
-    name: Build iOS Simulator (experimental)
+    name: Build iOS Simulator
     runs-on: macos-15
     timeout-minutes: 90
     steps:

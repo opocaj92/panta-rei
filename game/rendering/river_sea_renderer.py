@@ -12,6 +12,33 @@ class RiverSeaRenderer:
         self.river = [assets.image(f'scene_10/river_overlay_{i:02}', f'scene_10/river_overlay_{i:02}.png', alpha=True, required=True) for i in range(1, 9)]
         self._scaled = {}
 
+    @classmethod
+    def preload_steps(cls, assets, size):
+        """Prepare Scene 10 incrementally during Scene 09 (one costly step per frame).
+
+        Yields after each image load and each scale, then returns the renderer.
+        The completed renderer is reused by Scene 10, including its scaled cache.
+        """
+        groups = (
+            ("empty", False), ("connected", False), ("river_overlay", True),
+        )
+        for prefix, alpha in groups:
+            for i in range(1, cls.FRAME_COUNT + 1):
+                name = f"scene_10/{prefix}_{i:02}"
+                assets.image(name, f"{name}.png", alpha=alpha, required=True)
+                yield
+
+        renderer = cls(assets)  # All images now come from the asset cache.
+        scaled_groups = []
+        for group in (renderer.empty, renderer.connected, renderer.river):
+            scaled = []
+            for frame in group:
+                scaled.append(pygame.transform.smoothscale(frame, size))
+                yield
+            scaled_groups.append(scaled)
+        renderer._scaled[size] = tuple(scaled_groups)
+        return renderer
+
     def _frames(self, size):
         if size not in self._scaled:
             self._scaled[size] = tuple(

@@ -27,9 +27,9 @@ def make_scene(**config):
     return InteractiveScene(game, base)
 
 
-def test_help_appears_after_eight_seconds():
+def test_help_appears_after_default_five_seconds():
     scene = make_scene()
-    scene.update_help(7.0)
+    scene.update_help(4.0)
     assert not scene.help_visible
     scene.update_help(1.0)
     assert scene.help_visible
@@ -58,4 +58,15 @@ def test_help_disappears_only_when_no_longer_needed():
 def test_negative_delta_does_not_advance_help():
     scene = make_scene()
     scene.update_help(-5.0)
+    assert scene.help_wait_elapsed == 0.0
+
+
+def test_scene_specific_help_delay_and_reset():
+    scene = make_scene(help_delay=8.0)
+    scene.update_help(7.0)
+    assert not scene.help_visible
+    scene.update_help(1.0)
+    assert scene.help_visible
+    scene.reset_help()
+    assert not scene.help_visible
     assert scene.help_wait_elapsed == 0.0

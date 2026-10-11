@@ -7,19 +7,25 @@ from game.systems.approach import ApproachSystem
 
 
 class Scene08(Scene):
-    """Stella can optionally lean closer to Marco while speaking."""
+    """Stella must lean closer to Marco before the scene can end."""
 
     def __init__(self, game, config):
         super().__init__(game, config)
         self.renderer = StellaPOVRenderer(config, game.assets)
         self.camera_y = 0.0
         self.elapsed = 0.0
-        self.approach_system = ApproachSystem(config.get("approach", {}).get("drag_sensitivity", 0.0028))
+        approach = config.get("approach", {})
+        self.approach_system = ApproachSystem(
+            approach.get("drag_sensitivity", 0.0028),
+            smoothing_time=approach.get("smoothing_time", 0.22),
+        )
+        self.min_required_approach = float(approach.get("min_required_approach", 0.05))
+        self.grass_volume = float(config.get("grass_volume", 0.35))
         self.completion_timer = CompletionTimer()
         self.drag_sound_played = False
 
     def help_needed(self):
-        return not self.transition_started and self.approach_system.progress < 1.0
+        return not self.transition_started and self.approach_system.progress < self.min_required_approach
 
     def enter(self):
         # Preserve the exact camera position passed by Scene 07.
@@ -41,7 +47,7 @@ class Scene08(Scene):
         # Trigger only once per gesture, and only if Stella actually moves closer.
         if (event.type == pygame.MOUSEMOTION and not self.drag_sound_played
                 and self.approach_system.progress > before):
-            self.game.audio.play_sfx("scene08_grass_swish", volume=0.35)
+            self.game.audio.play_sfx("scene08_grass_swish", volume=self.grass_volume)
             self.drag_sound_played = True
 
     def pinch_touch(self, distance_delta):
@@ -49,11 +55,8 @@ class Scene08(Scene):
         before = self.approach_system.progress
         self.approach_system.pinch(distance_delta, enabled=not self.transition_started)
         if self.approach_system.progress > before and not self.drag_sound_played:
-            self.game.audio.play_sfx("scene08_grass_swish", volume=0.35)
+            self.game.audio.play_sfx("scene08_grass_swish", volume=self.grass_volume)
             self.drag_sound_played = True
-        elif distance_delta < 0:
-            # Allow a new swish on the next outward pinch.
-            self.drag_sound_played = False
 
     def update(self, dt):
         self.game.audio.update_ambience_layers(dt)
@@ -61,8 +64,9 @@ class Scene08(Scene):
         self.approach_system.update(dt)
         self.game.dialogue.update(dt)
 
-        elapsed = self.completion_timer.update(dt, active=self.game.dialogue.finished)
-        if not self.game.dialogue.finished:
+        ready = self.game.dialogue.finished and self.approach_system.progress >= self.min_required_approach
+        elapsed = self.completion_timer.update(dt, active=ready)
+        if not ready:
             return
         delay = float(self.config.get("post_dialogue_delay", 1.0))
         if elapsed >= delay and not self.transition_started:

@@ -1,7 +1,10 @@
+import logging
+
 import pygame
 
 from game.core.scene import Scene
-from game.core.timing import CompletionTimer
+from game.core.meeting_audio import meeting_audio_volumes
+from game.core.timing import CompletionTimer, approach_linear
 from game.rendering.river_sea_renderer import RiverSeaRenderer
 from game.systems.river_drag import RiverDragSystem
 
@@ -16,22 +19,40 @@ class Scene10(Scene):
         self.river_drag = None
         self.completion_timer = CompletionTimer()
         self.arrival_played = False
-        self.music_gain = 0.32
+        self.initial_music_volume = float(self.music_cfg.get("initial_volume", 0.32))
+        self.music_increase = float(self.music_cfg.get("progress_volume_increase", 0.18))
+        self.music_smoothing = float(self.music_cfg.get("smoothing_rate", 2.5))
+        self.music_gain = self.initial_music_volume
+        self.harmony_volume, self.shimmer_volume = meeting_audio_volumes()
 
     @property
     def interaction_cfg(self):
         return self.config.get('interaction', {})
 
+    @property
+    def music_cfg(self):
+        return self.config.get("music", {})
+
     def help_needed(self):
-        return not self.river_drag.connected and not self.transition_started
+        return (self.river_drag is not None and not self.river_drag.connected
+                and not self.transition_started)
 
     def enter(self):
         self.game.dialogue.load('scene_10')
-        self.renderer = RiverSeaRenderer(self.game.assets)
+        self.renderer = getattr(self.game, "preloaded_scene10_renderer", None)
+        if self.renderer is None:
+            # Fallback if Scene 09 was skipped or preloading was incomplete.
+            logging.getLogger(__name__).info(
+                "Scene 10 renderer: synchronous fallback (preload unavailable)"
+            )
+            self.renderer = RiverSeaRenderer(self.game.assets)
+        else:
+            logging.getLogger(__name__).info("Scene 10 renderer: preloaded")
+        self.game.preloaded_scene10_renderer = None
 
         self.river_drag = RiverDragSystem(self.interaction_cfg, self.game.screen.get_size())
         self.arrival_played = False
-        self.music_gain = 0.32
+        self.music_gain = self.initial_music_volume
         # Scene 09 leaves this track playing: updating its volume does not restart it.
         self.game.audio.play_music("scene09_suspended_atmosphere", volume=self.music_gain)
 
@@ -46,15 +67,17 @@ class Scene10(Scene):
         if self.river_drag.connected:
             progress = 1.0
         # Match Scene 09: only the shared suspended music grows with progress.
-        target_music = 0.32 + 0.18 * progress
-        smoothing = min(1.0, max(0.0, dt) * 2.5)
-        self.music_gain += (target_music - self.music_gain) * smoothing
+        target_music = self.initial_music_volume + self.music_increase * progress
+        self.music_gain = approach_linear(
+            self.music_gain, target_music, dt,
+            self.music_smoothing,
+        )
         if not self.transition_started:
             self.game.audio.play_music("scene09_suspended_atmosphere", volume=self.music_gain)
         if self.river_drag.connected and not self.arrival_played:
             self.arrival_played = True
-            self.game.audio.play_sfx("scene09_meeting_harmony", volume=0.60)
-            self.game.audio.play_sfx("scene09_kiss_shimmer", volume=0.32)
+            self.game.audio.play_sfx("scene09_meeting_harmony", volume=self.harmony_volume)
+            self.game.audio.play_sfx("scene09_kiss_shimmer", volume=self.shimmer_volume)
         self.game.dialogue.update(dt)
         if self.river_drag.connected and self.game.dialogue.finished:
             elapsed = self.completion_timer.update(dt, active=True)

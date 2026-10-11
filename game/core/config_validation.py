@@ -96,20 +96,35 @@ def validate_scene_config(name, config):
         _positive(rect[2], f"{name}.presentation.phone_glass_rect.width")
         _positive(rect[3], f"{name}.presentation.phone_glass_rect.height")
 
+    for field in ("rustle_volume", "phone_volume", "grass_volume"):
+        if field in config:
+            _fraction(config[field], f"{name}.{field}")
+    music = config.get("music")
+    if music is not None:
+        _require(music, ("initial_volume", "progress_volume_increase", "smoothing_rate"), f"{name}.music")
+        initial = _fraction(music["initial_volume"], f"{name}.music.initial_volume")
+        increase = _positive(music["progress_volume_increase"], f"{name}.music.progress_volume_increase", allow_zero=True)
+        if initial + increase > 1.0:
+            raise ValueError(f"{name}.music maximum volume exceeds 1")
+        _positive(music["smoothing_rate"], f"{name}.music.smoothing_rate", allow_zero=True)
+        if "fade_in_ms" in music:
+            _positive(music["fade_in_ms"], f"{name}.music.fade_in_ms", allow_zero=True)
+    if "meeting_audio" in config:
+        for key, gain in config["meeting_audio"].items():
+            _fraction(gain, f"{name}.meeting_audio.{key}")
+    if "meeting_flash" in config:
+        flash = config["meeting_flash"]
+        _require(flash, ("fade_in_duration", "fade_out_duration"), f"{name}.meeting_flash")
+        for key in ("fade_in_duration", "fade_out_duration"):
+            _positive(flash[key], f"{name}.meeting_flash.{key}")
+
     if name == "scene_02":
-        _require(config, ("horizontal_views", "initial_view", "attention_sequence"), name)
+        _require(config, ("horizontal_views", "initial_view"), name)
         views = config["horizontal_views"]
         if not isinstance(views, list) or not views:
             raise ValueError("scene_02.horizontal_views must be a non-empty list")
         if config["initial_view"] not in views:
             raise ValueError("scene_02.initial_view must be present in scene_02.horizontal_views")
-        for index, step in enumerate(config["attention_sequence"]):
-            _require(step, ("view", "duration"), f"scene_02.attention_sequence[{index}]")
-            if step["view"] not in views:
-                raise ValueError(
-                    f"scene_02.attention_sequence[{index}].view must be present in scene_02.horizontal_views"
-                )
-            _positive(step["duration"], f"scene_02.attention_sequence[{index}].duration")
         _positive(config.get("dialogue_start_delay", 0.0), "scene_02.dialogue_start_delay", allow_zero=True)
 
         shooting_star = config.get("presentation", {}).get("shooting_star", {})
@@ -152,6 +167,8 @@ def validate_scene_config(name, config):
         approach = config["approach"]
         _require(approach, ("drag_sensitivity", "max_safe_zoom"), f"{name}.approach")
         _positive(approach["drag_sensitivity"], "scene_08.approach.drag_sensitivity")
+        _positive(approach.get("smoothing_time", 0.22), "scene_08.approach.smoothing_time")
+        _fraction(approach.get("min_required_approach", 0.05), "scene_08.approach.min_required_approach")
         if _positive(approach["max_safe_zoom"], "scene_08.approach.max_safe_zoom") < 1.0:
             raise ValueError("scene_08.approach.max_safe_zoom must be at least 1")
 
@@ -159,12 +176,15 @@ def validate_scene_config(name, config):
         _require(config, ("interaction", "next_scene"), name)
         interaction = config["interaction"]
         _require(interaction, ("final_separation", "join_threshold"), "scene_09.interaction")
+        start_separation = _positive(interaction.get("start_separation", 118.0), "scene_09.interaction.start_separation")
         final_separation = _positive(
             interaction["final_separation"], "scene_09.interaction.final_separation"
         )
         join_threshold = _positive(
             interaction["join_threshold"], "scene_09.interaction.join_threshold", allow_zero=True
         )
+        if join_threshold > start_separation:
+            raise ValueError("scene_09.interaction.join_threshold exceeds start_separation")
         if final_separation < join_threshold:
             raise ValueError(
                 "scene_09.interaction.final_separation must be >= join_threshold"
@@ -186,3 +206,22 @@ def validate_scene_config(name, config):
         _positive(interaction["grab_radius"], "scene_10.interaction.grab_radius")
         if 1.0 - initial <= sea_edge:
             raise ValueError("scene_10.interaction initial river tip must begin to the right of the sea edge")
+
+
+def validate_audio_config(config, *, context):
+    """Validate authored riverbank layer names and normalized per-view gains."""
+    _require(config, ("layers", "mixes"), context)
+    layers, mixes = config["layers"], config["mixes"]
+    if not isinstance(layers, dict) or not layers:
+        raise ValueError(f"{context}.layers must be a non-empty object")
+    for layer, asset in layers.items():
+        if not isinstance(layer, str) or not isinstance(asset, str) or not asset:
+            raise ValueError(f"{context}.layers contains an invalid asset")
+    if not isinstance(mixes, dict) or not mixes:
+        raise ValueError(f"{context}.mixes must be a non-empty object")
+    for view, mix in mixes.items():
+        _require(mix, layers.keys(), f"{context}.mixes.{view}")
+        if set(mix) != set(layers):
+            raise ValueError(f"{context}.mixes.{view} has unknown layers")
+        for layer, gain in mix.items():
+            _fraction(gain, f"{context}.mixes.{view}.{layer}")

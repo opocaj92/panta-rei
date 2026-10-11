@@ -2,39 +2,21 @@ import pygame
 import random
 
 from game.core.scene import Scene
+from game.core.riverbank_audio import riverbank_audio, riverbank_mix
 from game.rendering.marco_pov_renderer import MarcoPOVRenderer
 from game.systems.gaze import GazeSystem
 
 
 class Scene02(Scene):
+    """Marco's POV: explore every view before returning to the river for dialogue."""
+
     RUSTLE_SOUNDS = ("scene02_clothing_rustle_01", "scene02_clothing_rustle_02", "scene02_clothing_rustle_03")
-    RUSTLE_VOLUME = 0.36
-
-    AUDIO_LAYERS = {
-        "river": "scene02_river",
-        "wind": "scene01_night_wind",
-        "vegetation": "scene02_vegetation",
-        "phone": "scene02_phone",
-    }
-    VIEW_MIX = {
-        "river": {"river": 0.18, "wind": 0.07, "vegetation": 0.07, "phone": 0.09},
-        "stella": {"river": 0.09, "wind": 0.09, "vegetation": 0.05, "phone": 0.11},
-        "grass": {"river": 0.05, "wind": 0.17, "vegetation": 0.42, "phone": 0.02},
-        "city": {"river": 0.05, "wind": 0.30, "vegetation": 0.12, "phone": 0.02},
-        "sky": {"river": 0.05, "wind": 0.45, "vegetation": 0.05, "phone": 0.00},
-    }
-
-    """
-    Marco's POV.
-
-    Presentation belongs to the scene (`current_view`). GazeSystem only
-    interprets directional input. Puzzle timings and available views come
-    from this scene's JSON configuration.
-    """
 
     def __init__(self, game, config):
         super().__init__(game, config)
         self.renderer = MarcoPOVRenderer(game.assets, config)
+        self.audio_layers = riverbank_audio()["layers"]
+        self.rustle_volume = float(config.get("rustle_volume", 0.36))
 
         self.horizontal_views = list(config.get("horizontal_views", []))
         self.sky_view = config.get("sky_view")
@@ -51,18 +33,13 @@ class Scene02(Scene):
             initial_view=self.current_view,
         )
 
-        sequence = config.get("attention_sequence", [])
-        if len(sequence) < 2:
-            raise ValueError("scene_02 requires two attention_sequence steps")
-
-        self.stella_view = sequence[0]["view"]
-        self.stella_required = float(sequence[0]["duration"])
-        self.river_view = sequence[1]["view"]
-        self.river_required = float(sequence[1]["duration"])
-
-        self.stella_attention = 0.0
-        self.river_attention = 0.0
-        self.stella_seen = False
+        self.river_view = "river"
+        if self.river_view not in self.horizontal_views:
+            raise ValueError("scene_02 requires a 'river' horizontal view")
+        self.required_views = set(self.horizontal_views)
+        if self.sky_view is not None:
+            self.required_views.add(self.sky_view)
+        self.visited_views = {self.current_view}
         self.progress_complete = False
         self.dialogue_delay = 0.0
         self.dialogue_started = False
@@ -79,7 +56,7 @@ class Scene02(Scene):
         # The opening wind stays audible until this scene is activated.
         # Fade it out while the new layers fade in, avoiding a silent gap.
         self.game.audio.stop_ambience(fade_ms=900)
-        self.game.audio.start_ambience_layers(self.AUDIO_LAYERS)
+        self.game.audio.start_ambience_layers(self.audio_layers)
         self._set_view_mix(fade_ms=900)
 
     def handle_input(self, event):
@@ -95,17 +72,21 @@ class Scene02(Scene):
 
         requested_view = self.gaze.handle_key(event.key)
         if requested_view is not None:
-            # View navigation is active exploration, not inactivity. Reset the
-            # contextual-help clock and dismiss any currently visible hint.
-
             if requested_view != self.current_view:
                 self.current_view = requested_view
-                self.game.audio.play_sfx(random.choice(self.RUSTLE_SOUNDS), volume=self.RUSTLE_VOLUME)
+                self.visited_views.add(requested_view)
+                self.game.audio.play_sfx(random.choice(self.RUSTLE_SOUNDS), volume=self.rustle_volume)
                 self._set_view_mix(fade_ms=800)
+                # Lock the gaze on the river as soon as all views have been
+                # explored; preserve the existing pause before dialogue.
+                if (self.current_view == self.river_view
+                        and self.required_views.issubset(self.visited_views)):
+                    self.progress_complete = True
+                    self.dialogue_delay = float(self.config.get("dialogue_start_delay", 0.8))
 
     def _set_view_mix(self, *, fade_ms):
-        mix = self.VIEW_MIX.get(self.current_view, self.VIEW_MIX["river"])
-        for name in self.AUDIO_LAYERS:
+        mix = riverbank_mix(self.current_view if self.current_view in riverbank_audio()["mixes"] else "river")
+        for name in self.audio_layers:
             self.game.audio.set_ambience_layer_volume(
                 name, mix.get(name, 0.0), fade_ms=fade_ms
             )
@@ -121,22 +102,6 @@ class Scene02(Scene):
         self.renderer.update(dt, self.current_view)
 
         if not self.progress_complete:
-            if self.current_view == self.stella_view:
-                if not self.stella_seen:
-                    self.stella_attention += dt
-
-                    if self.stella_attention >= self.stella_required:
-                        self.stella_seen = True
-
-
-            elif self.current_view == self.river_view and self.stella_seen:
-                self.river_attention += dt
-
-                if self.river_attention >= self.river_required:
-                    self.progress_complete = True
-                    self.dialogue_delay = float(
-                        self.config.get("dialogue_start_delay", 0.8)
-                    )
             return
 
         if self.dialogue_delay > 0:
@@ -148,7 +113,7 @@ class Scene02(Scene):
 
         if self.game.dialogue.finished and not self.transition_started:
             fade_ms = round(float(self.config.get("transition_out", {}).get("duration", 0.0)) * 1000)
-            for name in self.AUDIO_LAYERS:
+            for name in self.audio_layers:
                 target = 0.18 if name == "river" else 0.0
                 self.game.audio.set_ambience_layer_volume(name, target, fade_ms=fade_ms)
             self.request_transition("scene_03")

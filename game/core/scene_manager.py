@@ -100,9 +100,14 @@ class SceneManager:
             self.current.exit()
         self.current_name = name
         self.current = next_scene
-        self.current.enter()
+        self.current.reset_help()
+        try:
+            self.current.enter()
+        except Exception as exc:
+            raise RuntimeError(f"Failed to activate {name!r} during enter()") from exc
         self.game.audio.enter_scene(name)
         self.game.update_cursor_visibility()
+        self.game._scene_clock_reset_requested = True
         if start_transition_in:
             self._start_transition_in(config.get("transition_in"))
 

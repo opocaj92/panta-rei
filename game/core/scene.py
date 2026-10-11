@@ -12,10 +12,14 @@ class Scene:
     def __init__(self, game, config):
         self.game = game
         self.config = config
-        self.help_visible = False
-        self.help_wait_elapsed = 0.0
+        self.reset_help()
         self.incoming_state = {}
         self.transition_started = False
+
+    def reset_help(self):
+        """Reset contextual help when a scene is activated or reused."""
+        self.help_visible = False
+        self.help_wait_elapsed = 0.0
 
     def request_transition(self, destination, *, state=None, already_faded=False):
         """Request the configured exit transition at most once per scene."""

@@ -152,7 +152,7 @@ class PhoneCreditsRenderer:
                 if phase == "final":
                     # The final message replaces the authorship title; the opening title stays unchanged.
                     lines = (
-                        ("A special thank to", "credits_subtitle", (180, 194, 209)),
+                        ("A special thanks to", "credits_subtitle", (180, 194, 209)),
                         ("YOU", "credits_title", (246, 241, 228)),
                         ("for playing Panta Rei", "credits_subtitle", (180, 194, 209)),
                     )
@@ -174,7 +174,7 @@ class PhoneCreditsRenderer:
                         y += glyph.get_height() + spacing
                 elif phase == "title":
                     title = self.outlined_text(self.typography.font("credits_title", scale), "PANTA REI", (246, 241, 228), radius=max(1, round(scale)))
-                    subtitle = self.outlined_text(self.typography.font("credits_subtitle", scale), "Everything Flows", (180, 194, 209), radius=max(1, round(scale)))
+                    subtitle = self.outlined_text(self.typography.font("credits_subtitle", scale), "Everything Flows.", (180, 194, 209), radius=max(1, round(scale)))
                     if subtitle.get_width() > round((self.glass.width - 8) * scale):
                         subtitle = pygame.transform.smoothscale(subtitle, (round((self.glass.width - 8) * scale), subtitle.get_height()))
                     static.blit(title, ((credits.get_width() - title.get_width()) // 2, round((self.glass.centery - 21) * scale)))

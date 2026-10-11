@@ -44,6 +44,8 @@ class Game:
         self.transitions = TransitionManager()
         self.scenes = SceneManager(self)
         self.running = True
+        self._scene_clock_reset_requested = False
+        self.preloaded_scene10_renderer = None
 
     def _set_display(self, fullscreen):
         if fullscreen:
@@ -172,6 +174,11 @@ class Game:
             self.transitions.update(dt)
 
             self._present_frame()
+            if self._scene_clock_reset_requested:
+                # Do not charge synchronous scene activation/first rendering
+                # against the new scene's next gameplay/help update.
+                self.clock.tick()
+                self._scene_clock_reset_requested = False
 
         self.audio.shutdown()
         pygame.quit()

@@ -13,3 +13,20 @@ class CompletionTimer:
 
     def reset(self) -> None:
         self.elapsed = 0.0
+
+
+def approach_linear(current: float, target: float, dt: float, rate: float) -> float:
+    """Frame-rate-scaled linear interpolation with a clamped, nonnegative step.
+
+    ``rate`` is the fraction approached per second for small ``dt``; a long
+    frame may complete the interpolation. This preserves the existing music
+    ramp behavior used in Scenes 09 and 10.
+    """
+    factor = min(1.0, max(0.0, dt) * max(0.0, rate))
+    return current + (target - current) * factor
+
+
+def smoothstep(value: float) -> float:
+    """Clamped cubic ease-in/out, shared by camera and audio animations."""
+    t = max(0.0, min(1.0, value))
+    return t * t * (3.0 - 2.0 * t)

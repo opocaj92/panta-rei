@@ -1,7 +1,8 @@
 import math
 
 from game.core.scene import Scene
-from game.scenes.scene_02 import Scene02
+from game.core.timing import smoothstep
+from game.core.riverbank_audio import riverbank_audio, riverbank_mix
 from game.rendering.stella_pov_renderer import StellaPOVRenderer
 from game.rendering.phone_credits_renderer import PhoneCreditsRenderer
 
@@ -33,7 +34,7 @@ class Scene12(Scene):
         # Scene 11's sky ambience continues through its full black hold.
         # Begin the handoff only as the credits fade into view.
         reveal_ms = round(float(self.config.get('transition_in', {}).get('duration', 1.0)) * 1000)
-        for name in Scene02.AUDIO_LAYERS:
+        for name in riverbank_audio()["layers"]:
             self.game.audio.set_ambience_layer_volume(name, 0.0, fade_ms=reveal_ms)
         self.game.audio.play_music('scene12_final_credits', fade_ms=reveal_ms, volume=0.55, restart=True)
 
@@ -62,7 +63,7 @@ class Scene12(Scene):
             # Smooth acceleration from the opening title; gentle speed variation
             # keeps the names legible without abrupt stop/start jumps.
             ramp = min(1.0, self.phase_time / 1.1)
-            ramp = ramp * ramp * (3 - 2 * ramp)
+            ramp = smoothstep(ramp)
             cadence = 0.90 + 0.10 * math.cos(self.scroll_y / 42.0)
             self.scroll_y -= speed * ramp * cadence * dt
             if self.scroll_y + self.credits_renderer.credit_height <= -12:

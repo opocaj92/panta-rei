@@ -2,7 +2,8 @@ import math
 import pygame
 
 from game.core.scene import Scene
-from game.scenes.scene_02 import Scene02
+from game.core.timing import smoothstep
+from game.core.riverbank_audio import riverbank_audio, riverbank_mix
 from game.rendering.sky_panorama_renderer import SkyPanoramaRenderer
 
 
@@ -36,23 +37,23 @@ class Scene11(Scene):
         self.game.dialogue.load("scene_11")
         # Return from the abstract interlude to Scene 02's original soundscape.
         # These channels remain running throughout the upward pan.
-        self.game.audio.start_ambience_layers(Scene02.AUDIO_LAYERS)
-        self._set_audio_mix(Scene02.VIEW_MIX["stella"], fade_ms=900)
+        self.game.audio.start_ambience_layers(riverbank_audio()["layers"])
+        self._set_audio_mix(riverbank_mix("stella"), fade_ms=900)
 
     def _set_audio_mix(self, mix, *, fade_ms=0):
-        for name in Scene02.AUDIO_LAYERS:
+        for name in riverbank_audio()["layers"]:
             self.game.audio.set_ambience_layer_volume(
                 name, mix.get(name, 0.0), fade_ms=fade_ms
             )
 
     def _update_gaze_audio(self):
         # Match the camera's smoothstep rather than a separate audio timer.
-        t = self._smoothstep(self.gaze_progress)
-        stella = Scene02.VIEW_MIX["stella"]
-        sky = Scene02.VIEW_MIX["sky"]
+        t = smoothstep(self.gaze_progress)
+        stella = riverbank_mix("stella")
+        sky = riverbank_mix("sky")
         self._set_audio_mix({
             name: stella[name] + (sky[name] - stella[name]) * t
-            for name in Scene02.AUDIO_LAYERS
+            for name in riverbank_audio()["layers"]
         })
 
     def handle_input(self, event):
@@ -117,13 +118,8 @@ class Scene11(Scene):
         self.phase = "black_hold"
         self.phase_timer = 0.0
 
-    @staticmethod
-    def _smoothstep(value):
-        value = max(0.0, min(1.0, value))
-        return value * value * (3.0 - 2.0 * value)
-
     def render(self, screen):
-        progress = self._smoothstep(self.gaze_progress)
+        progress = smoothstep(self.gaze_progress)
         self.renderer.render(screen, camera_y=360 * (1.0 - progress))
 
         if self.phase == "dialogue":

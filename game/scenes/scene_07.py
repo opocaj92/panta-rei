@@ -1,17 +1,13 @@
 import pygame
 
 from game.core.scene import Scene
-from game.scenes.scene_02 import Scene02
+from game.core.timing import smoothstep
+from game.core.riverbank_audio import riverbank_mix
 from game.rendering.stella_pov_renderer import StellaPOVRenderer
 
 
 class Scene07(Scene):
     """Stella's POV: look up from her phone to Marco, then hear her reply."""
-
-    # Match Scene 02's Stella and river views, except for the louder
-    # phone recording while Stella is looking directly at her screen.
-    PHONE_MIX = {**Scene02.VIEW_MIX["stella"], "phone": 0.38}
-    RIVER_MIX = Scene02.VIEW_MIX["river"]
 
     def _set_mix(self, mix, fade_ms):
         for name, gain in mix.items():
@@ -40,7 +36,7 @@ class Scene07(Scene):
         # Reuse Scene 02's still-playing ambience channels, especially the river.
         # Only the phone recording changes to match Stella's fixed video.
         self.game.audio.replace_ambience_layer_sound("phone", "scene07_phone_fixed_video")
-        self._set_mix(self.PHONE_MIX, fade_ms=900)
+        self._set_mix(riverbank_mix("stella", {"phone": float(self.config.get("phone_volume", 0.38))}), fade_ms=900)
         camera = self.config.get("camera", {})
         self.start_y = float(camera.get("phone_y", 360.0))
         self.target_y = float(camera.get("marco_y", 0.0))
@@ -57,7 +53,7 @@ class Scene07(Scene):
 
             self.pan_elapsed = 0.0
             # Stella looks away from the phone: crossfade with her camera pan.
-            self._set_mix(self.RIVER_MIX, fade_ms=round(self.pan_duration * 1000))
+            self._set_mix(riverbank_mix("river"), fade_ms=round(self.pan_duration * 1000))
 
     def update(self, dt):
         self.game.audio.update_ambience_layers(dt)
@@ -70,7 +66,7 @@ class Scene07(Scene):
             self.pan_elapsed += dt
             t = min(1.0, self.pan_elapsed / self.pan_duration)
             # Smoothstep: gentle acceleration/deceleration, still deterministic.
-            smooth_t = t * t * (3.0 - 2.0 * t)
+            smooth_t = smoothstep(t)
             self.camera_y = self.start_y + (self.target_y - self.start_y) * smooth_t
 
             if t >= 1.0:
