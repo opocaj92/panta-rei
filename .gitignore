@@ -1,8 +1,31 @@
+# Python
 __pycache__/
 *.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .venv/
 venv/
 env/
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+.buildozer/
+bin/
+.gradle/
+*.apk
+*.aab
+
+# IDE / OS
 .idea/
 .vscode/
 .DS_Store
+Thumbs.db
+
+# Logs / local configuration
+*.log
+.env
+.env.*
+!.env.example
