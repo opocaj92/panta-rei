@@ -16,7 +16,9 @@
   ],
   "camera_speed": 360.0,
   "estuary": {
-    "required_visible_fraction": 0.8
+    "min_camera_x": 1000.0,
+    "min_camera_y": 50.0,
+    "max_camera_y": 100.0
   },
   "next_scene": "scene_05",
   "help": {

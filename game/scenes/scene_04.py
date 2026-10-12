@@ -9,8 +9,8 @@ class Scene04(Scene):
     """Follow the river until its estuary comes into view.
 
     Navigation and dialogue are independent. Scene 04 completes only while
-    enough of the configured estuary region is CURRENTLY visible and the
-    dialogue has finished. Scene 05 then inherits that exact camera position.
+    the camera has reached the configured horizontal and vertical framing
+    thresholds and dialogue has finished. Scene 05 inherits the camera position.
     """
 
     def __init__(self, game, config):
@@ -25,15 +25,10 @@ class Scene04(Scene):
         self.camera_speed = float(config.get("camera_speed", 360.0))
 
         estuary = config.get("estuary", {})
-        region = world["estuary_region"]
-        self.estuary_region = pygame.Rect(*map(int, region))
-        self.required_visible_fraction = float(
-            estuary.get("required_visible_fraction", 0.35)
-        )
-
+        self.min_camera_x = float(estuary["min_camera_x"])
+        self.min_camera_y = float(estuary["min_camera_y"])
+        self.max_camera_y = float(estuary["max_camera_y"])
         self.estuary_visible = False
-        self.best_estuary_distance = float("inf")
-        self.best_visible_fraction = 0.0
         self.flow_time = 0.0
 
         self.river_points = [tuple(point) for point in world["river_points"]]
@@ -105,32 +100,12 @@ class Scene04(Scene):
         self.camera.y = max(0.0, min(self.camera.y, max_y))
 
     def _check_estuary_visibility(self):
-        # This is deliberately NOT latched. If the player finds the estuary and
-        # then moves away, Scene 04 must wait until enough of it is visible again.
-        screen_width, screen_height = self.game.screen.get_size()
-        viewport = pygame.Rect(
-            round(self.camera.x),
-            round(self.camera.y),
-            screen_width,
-            screen_height,
+        # A bounded Y range prevents finishing with the estuary too high
+        # or too low, even if dialogue finishes before camera navigation.
+        self.estuary_visible = (
+            self.camera.x >= self.min_camera_x
+            and self.min_camera_y <= self.camera.y <= self.max_camera_y
         )
-        visible = viewport.clip(self.estuary_region)
-        region_area = self.estuary_region.width * self.estuary_region.height
-        visible_area = visible.width * visible.height
-        visible_fraction = visible_area / region_area if region_area else 0.0
-
-        viewport_center = pygame.Vector2(viewport.center)
-        estuary_center = pygame.Vector2(self.estuary_region.center)
-        distance = viewport_center.distance_to(estuary_center)
-        if (
-            distance < self.best_estuary_distance - 1.0
-            or visible_fraction > self.best_visible_fraction + 0.001
-        ):
-            self.best_estuary_distance = min(self.best_estuary_distance, distance)
-            self.best_visible_fraction = max(self.best_visible_fraction, visible_fraction)
-
-
-        self.estuary_visible = visible_fraction >= self.required_visible_fraction
 
     def render(self, screen):
         self.river_renderer.render(

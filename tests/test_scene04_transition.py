@@ -47,7 +47,7 @@ class Scene04TransitionTests(unittest.TestCase):
             "world": "river_estuary",
             "camera_start": [0, 1500],
             "camera_speed": 360.0,
-            "estuary": {"required_visible_fraction": 0.6},
+            "estuary": {"min_camera_x": 1000, "min_camera_y": 50, "max_camera_y": 100},
             "next_scene": "scene_05",
             "transition_out": {"type": "none", "duration": 0.0},
         }
@@ -61,3 +61,34 @@ class Scene04TransitionTests(unittest.TestCase):
 
         self.assertTrue(scene.transition_started)
         self.assertEqual(1, len(game.scenes.calls))
+
+
+class Scene04FramingTests(unittest.TestCase):
+    def test_requires_both_camera_thresholds(self):
+        try:
+            from game.scenes.scene_04 import Scene04
+        except ModuleNotFoundError as exc:
+            self.skipTest(f"pygame unavailable: {exc}")
+
+        game = SimpleNamespace(screen=SimpleNamespace(get_size=lambda: (640, 360)))
+        config = {
+            "world": "river_estuary",
+            "camera_start": [0, 0],
+            "estuary": {"min_camera_x": 1000, "min_camera_y": 50, "max_camera_y": 100},
+        }
+        with patch("game.scenes.scene_04.RiverWorldRenderer"):
+            scene = Scene04(game, config)
+
+        for x, y, expected in [
+            (999, 70, False),
+            (1000, 49, False),
+            (1000, 50, True),
+            (1032, 75, True),
+            (1032, 100, True),
+            (1032, 101, False),
+            (1032, 180, False),
+        ]:
+            with self.subTest(x=x, y=y):
+                scene.camera.update(x, y)
+                scene._check_estuary_visibility()
+                self.assertEqual(expected, scene.estuary_visible)

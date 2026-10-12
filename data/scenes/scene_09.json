@@ -39,5 +39,6 @@
   "meeting_flash": {
     "fade_in_duration": 0.15,
     "fade_out_duration": 0.4
-  }
+  },
+  "preload_idle_delay": 0.35
 }

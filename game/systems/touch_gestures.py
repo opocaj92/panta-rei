@@ -121,9 +121,10 @@ class TouchGestures:
                     key = pygame.K_UP if dy < 0 else pygame.K_DOWN
                 events.append(pygame.event.Event(pygame.KEYDOWN, key=key, mod=0, unicode=''))
             tapped = self.moved <= self.TAP_DISTANCE
-            # Menu taps become button releases; command taps retain the normal
-            # dialogue-advance path. Never deliver both for one gesture.
-            if scene_name == 'scene_01' and tapped and self.game.scenes.current.state == 'menu':
+            # Scene 01 menu and commands-panel taps become button releases.
+            # Do not also treat them as dialogue-advance taps.
+            if (scene_name == 'scene_01' and tapped
+                    and self.game.scenes.current.state in ('menu', 'commands')):
                 events.append(self._mouse(pygame.MOUSEBUTTONUP, position))
                 tapped = False
             self.cancel()

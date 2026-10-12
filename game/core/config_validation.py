@@ -153,9 +153,20 @@ def validate_scene_config(name, config):
     elif name == "scene_04":
         _require(config, ("world", "next_scene", "estuary"), name)
         _positive(config.get("camera_speed", 360.0), "scene_04.camera_speed")
-        _fraction(
-            config["estuary"].get("required_visible_fraction", 0.35),
-            "scene_04.estuary.required_visible_fraction",
+        for axis in ("min_camera_x", "min_camera_y", "max_camera_y"):
+            if axis not in config["estuary"]:
+                raise ValueError(f"scene_04.estuary.{axis} is required")
+            value = _finite_number(config["estuary"][axis], f"scene_04.estuary.{axis}")
+            if value < 0:
+                raise ValueError(f"scene_04.estuary.{axis} must be nonnegative")
+
+        if config["estuary"]["max_camera_y"] < config["estuary"]["min_camera_y"]:
+            raise ValueError("scene_04.estuary.max_camera_y must be >= min_camera_y")
+
+        _positive(
+            config["estuary"].get("min_camera_x", 0.0),
+            "scene_04.estuary.min_camera_x",
+            allow_zero=True,
         )
 
     elif name == "scene_05":

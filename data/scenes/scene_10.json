@@ -6,7 +6,7 @@
     "sea_edge_fraction": 0.31,
     "river_center_fraction": 0.5,
     "grab_radius": 42.0,
-    "drag_sensitivity": 0.7
+    "drag_sensitivity": 1.0
   },
   "post_complete_delay": 1.0,
   "next_scene": "scene_11",

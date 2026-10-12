@@ -47,6 +47,8 @@ class Scene09(Scene):
         self.flash_fade_out = float(flash.get("fade_out_duration", 0.40))
         self.music_gain = self.music_initial_volume
         self._scene10_preloader = None
+        self.preload_idle_delay = float(self.config.get("preload_idle_delay", 0.35))
+        self._preload_idle_elapsed = 0.0
 
     def help_needed(self):
         return self.phase in (self.APPROACHING, self.SEPARATING)
@@ -62,6 +64,7 @@ class Scene09(Scene):
         self.meeting_flash_outline = None
         self.meeting_flash_size = None
         self.silhouette_drag.stop()
+        self._preload_idle_elapsed = 0.0
         self.music_gain = self.music_initial_volume
         # Scene 08 fades the riverside ambience during its exit transition.
         # Scene 09 is an abstract interlude with its own continuous music.
@@ -85,6 +88,7 @@ class Scene09(Scene):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             side = self._silhouette_side_at(event.pos)
             if side is not None:
+                self._preload_idle_elapsed = 0.0
                 self.silhouette_drag.start(side, event.pos[0])
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             self.silhouette_drag.stop()
@@ -127,12 +131,16 @@ class Scene09(Scene):
         return self.renderer.side_at(self.game.screen, pos, self.separation)
 
     def update(self, dt):
-        if self._scene10_preloader is not None:
-            try:
-                next(self._scene10_preloader)
-            except StopIteration as completed:
-                self.game.preloaded_scene10_renderer = completed.value
-                self._scene10_preloader = None
+        # Never decode or scale Scene 10 images during an active drag. Resume
+        # only after a short idle period; the joined pause and exit blink are
+        # safe opportunities to continue preparing the next scene.
+        if self.silhouette_drag.dragging:
+            self._preload_idle_elapsed = 0.0
+        else:
+            self._preload_idle_elapsed += dt
+            if (self._preload_idle_elapsed >= self.preload_idle_delay
+                    or self.phase == self.JOINED or self.transition_started):
+                self._advance_scene10_preload()
         self.elapsed += dt
         # As the two figures approach, gently raise the atmospheric texture.
         start = max(1.0, self.start_separation)
@@ -172,6 +180,16 @@ class Scene09(Scene):
         if self.game.dialogue.finished and self.interaction_finished and not self.transition_started:
             # Preserve the same musical playback position into Scene 10.
             self.request_transition(self.config.get("next_scene", "scene_10"))
+
+    def _advance_scene10_preload(self):
+        """Run at most one potentially expensive preload operation per frame."""
+        if self._scene10_preloader is None:
+            return
+        try:
+            next(self._scene10_preloader)
+        except StopIteration as completed:
+            self.game.preloaded_scene10_renderer = completed.value
+            self._scene10_preloader = None
 
     @property
     def flash_duration(self):
