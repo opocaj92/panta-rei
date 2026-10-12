@@ -1,5 +1,7 @@
 # Panta Rei
 
+*Everything flows.*
+
 *A short, atmospheric narrative game about a river, the sea, and the things that cannot be undone.*
 
 **Panta Rei** (πάντα ῥεῖ, “everything flows”) is a 2D, pixel-art narrative experience made with **Python and Pygame**. Across twelve connected scenes, the story follows Marco and Stella through quiet moments, shifting perspectives, and small interactions that become irreversible choices.
@@ -119,7 +121,3 @@ This separation is intentional: the code can be studied and reused under MIT, wh
 ## Feedback and contributions
 
 Bug reports and constructive feedback are welcome through GitHub Issues. If you would like to contribute code, please open an issue first to discuss the proposed change; the game's narrative direction is intentionally authored.
-
----
-
-*Everything flows.*

@@ -80,7 +80,7 @@ class Game:
                 self.scenes.current_name in {"scene_08", "scene_09", "scene_10"}
                 or (
                     self.scenes.current_name == "scene_01"
-                    and getattr(self.scenes.current, "state", None) == "menu"
+                    and getattr(self.scenes.current, "state", None) in {"menu", "commands"}
                 )
             )
         )

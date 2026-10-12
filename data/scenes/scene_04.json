@@ -16,7 +16,7 @@
   ],
   "camera_speed": 360.0,
   "estuary": {
-    "required_visible_fraction": 0.6
+    "required_visible_fraction": 0.8
   },
   "next_scene": "scene_05",
   "help": {

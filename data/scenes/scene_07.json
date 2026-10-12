@@ -3,7 +3,7 @@
   "type": "stella_phone_pov",
   "camera": {
     "phone_y": 360,
-    "marco_y": 24,
+    "marco_y": 48,
     "pan_duration": 1.25
   },
   "next_scene": "scene_08",

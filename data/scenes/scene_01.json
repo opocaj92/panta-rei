@@ -39,6 +39,128 @@
         "start": "Inizia il gioco",
         "commands": "Mostra i comandi"
       }
+    },
+    "commands_panel": {
+      "rect": [
+        52,
+        32,
+        536,
+        296
+      ],
+      "back_button": [
+        256,
+        279,
+        128,
+        34
+      ],
+      "labels": {
+        "en": {
+          "title": "COMMANDS",
+          "control": "CONTROL",
+          "action": "ACTION",
+          "back": "Back",
+          "rows": [
+            [
+              "WASD / Arrow keys",
+              "Move or look around"
+            ],
+            [
+              "Left mouse button",
+              "Select or interact"
+            ],
+            [
+              "Click and drag",
+              "Move, draw or zoom when prompted"
+            ],
+            [
+              "Enter / Space",
+              "Advance dialogue"
+            ]
+          ]
+        },
+        "it": {
+          "title": "COMANDI",
+          "control": "COMANDO",
+          "action": "AZIONE",
+          "back": "Indietro",
+          "rows": [
+            [
+              "WASD / Frecce",
+              "Muoviti o guarda intorno"
+            ],
+            [
+              "Tasto sinistro",
+              "Seleziona o interagisci"
+            ],
+            [
+              "Clicca e trascina",
+              "Sposta, disegna o zoom quando richiesto"
+            ],
+            [
+              "Invio / Spazio",
+              "Avanza i dialoghi"
+            ]
+          ]
+        }
+      },
+      "touch_labels": {
+        "en": {
+          "title": "COMMANDS",
+          "control": "GESTURE",
+          "action": "ACTION",
+          "back": "Back",
+          "rows": [
+            [
+              "Swipe",
+              "Move or look around"
+            ],
+            [
+              "Tap",
+              "Select or interact"
+            ],
+            [
+              "Touch and drag",
+              "Move or draw"
+            ],
+            [
+              "Pinch out",
+              "Zoom when prompted"
+            ],
+            [
+              "Tap during dialogue",
+              "Advance dialogue"
+            ]
+          ]
+        },
+        "it": {
+          "title": "COMANDI",
+          "control": "GESTO",
+          "action": "AZIONE",
+          "back": "Indietro",
+          "rows": [
+            [
+              "Scorri",
+              "Muoviti o guarda intorno"
+            ],
+            [
+              "Tocca",
+              "Seleziona o interagisci"
+            ],
+            [
+              "Tocca e trascina",
+              "Sposta o disegna"
+            ],
+            [
+              "Allarga due dita",
+              "Zoom quando richiesto"
+            ],
+            [
+              "Tocca nei dialoghi",
+              "Avanza i dialoghi"
+            ]
+          ]
+        }
+      }
     }
   }
 }
